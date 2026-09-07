@@ -1,3 +1,32 @@
+"""
+===============================================================================
+FILE: backend/src/db.py
+MODULE: SQLite Relational Metadata Manager
+
+WHAT THIS FILE DOES:
+--------------------
+This module manages our local relational database (`backend/data/metadata.db`)
+using Python's standard library `sqlite3` (100% free, zero external setup).
+While ChromaDB handles high-dimensional vector search, SQLite acts as the
+project registry, keeping track of which GitHub repositories have been cloned,
+how many code chunks they contain, and when they were last indexed.
+
+KEY RESPONSIBILITIES & IMPLEMENTATIONS:
+1. Connection Lifecycle (`get_db_connection`):
+   - Establishes a connection to `data/metadata.db`.
+   - Uses `sqlite3.Row` so database records can be accessed like Python dictionaries.
+2. Schema Migration (`init_db`):
+   - Automatically creates the `repositories` table with:
+     [id, repo_name, repo_url, local_path, total_chunks, indexed_at].
+3. Upsert Logic (`register_or_update_repo`):
+   - Uses `INSERT ... ON CONFLICT(repo_name) DO UPDATE` so re-indexing an existing
+     repository updates its chunk count and timestamp instead of throwing an error.
+4. Queries (`get_repo`, `list_repos`):
+   - Fast lookup to verify if a repo is already indexed before re-running the
+     cloning or vector embedding pipeline.
+===============================================================================
+"""
+
 import sqlite3
 from typing import List, Dict, Any, Optional
 from pathlib import Path

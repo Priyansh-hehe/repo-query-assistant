@@ -1,3 +1,24 @@
+"""
+===============================================================================
+FILE: backend/test_parser.py
+SCRIPT: Step 2 Verification (Tree-sitter AST Code Chunker)
+
+WHAT THIS SCRIPT DOES:
+----------------------
+This is an interactive verification tool to test the Tree-sitter AST parsing
+engine (`src/parser.py`) on real source code.
+
+WHAT IT TESTS:
+1. Verifies that Tree-sitter and language grammars are loaded and active.
+2. "Dogfoods" our own code by parsing `backend/src/ingestion.py`.
+3. Demonstrates semantic function and class extraction without chopping lines:
+   - Prints each extracted chunk's entity type (FUNCTION vs CLASS).
+   - Prints the entity name (e.g. `parse_repo_name_from_url`).
+   - Prints exact 1-indexed start and end line numbers.
+   - Shows a preview of the clean code chunk.
+===============================================================================
+"""
+
 import sys
 from pathlib import Path
 

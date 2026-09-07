@@ -1,3 +1,32 @@
+"""
+===============================================================================
+FILE: backend/src/ingestion.py
+MODULE: GitHub Repository Ingestion & Noise Filtering Engine
+
+WHAT THIS FILE DOES:
+--------------------
+This is the first step in the RAG pipeline. It takes a public GitHub repository
+URL, downloads the source code locally, and scans the project to filter out
+irrelevant files (noise) so only valuable source code reaches the parser.
+
+KEY RESPONSIBILITIES & IMPLEMENTATIONS:
+1. URL Parsing (`parse_repo_name_from_url`):
+   - Extracts a clean, filesystem-safe folder name from URLs like:
+     'https://github.com/octocat/Hello-World.git' -> 'octocat_Hello-World'
+2. Shallow Git Cloning (`clone_repository`):
+   - Executes `git clone --depth 1` via Python's `subprocess` module.
+   - Why '--depth 1'? It downloads ONLY the latest snapshot of code, skipping
+     years of commit history. This is 10x-100x faster and saves massive disk space.
+   - If the repository was already downloaded earlier, it reuses the folder.
+3. Noise Reduction & File Discovery (`discover_code_files`):
+   - Recursively walks through the cloned repository.
+   - Blacklists directory noise: `.git/`, `node_modules/`, `.venv/`, `dist/`, `test/`, `tests/`, etc.
+   - Whitelists code extensions: `.py`, `.js`, `.ts`, `.go`, `.html`, `.css`, etc.
+   - Whitelists critical extension-less files: `README`, `LICENSE`, `Dockerfile`, `Makefile`.
+   - Discards non-text binaries and skips any single file larger than 1MB.
+===============================================================================
+"""
+
 import os
 import subprocess
 import re
@@ -21,6 +50,11 @@ IGNORED_DIRECTORIES = {
     "vendor",
     "coverage",
     ".turbo",
+    "test",
+    "tests",
+    "__tests__",
+    "spec",
+    "specs",
 }
 
 # File extensions we recognize as code or text worth reading
@@ -30,6 +64,11 @@ SUPPORTED_EXTENSIONS = {
     ".h", ".hpp", ".cs", ".rb", ".php",
     ".html", ".css", ".sql", ".sh",
     ".json", ".yaml", ".yml", ".md", ".txt"
+}
+
+# Known text files that often don't have extensions
+SUPPORTED_NAMES_WITHOUT_EXT = {
+    "readme", "license", "dockerfile", "makefile"
 }
 
 # Skip any individual file larger than 1MB (avoids minified bundles, big datasets)
@@ -103,8 +142,10 @@ def discover_code_files(repo_path: Path) -> List[Dict[str, Any]]:
             file_path = Path(root) / file_name
             ext = file_path.suffix.lower()
 
-            # Only accept supported code extensions
-            if ext not in SUPPORTED_EXTENSIONS:
+            # Only accept supported code extensions or known extensionless files
+            is_valid_ext = ext in SUPPORTED_EXTENSIONS
+            is_valid_name = file_name.lower() in SUPPORTED_NAMES_WITHOUT_EXT
+            if not (is_valid_ext or is_valid_name):
                 continue
 
             try:

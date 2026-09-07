@@ -11,11 +11,12 @@ flowchart TD
     subgraph Frontend ["Next.js Frontend (Port 3000)"]
         UI_Input["Repo URL Input & Indexing Bar"]
         UI_Chat["Interactive Chat UI with Citation Cards"]
+        UI_Drawer["Monaco Code Inspector Drawer"]
     end
 
     subgraph Backend ["FastAPI Backend (Port 8000)"]
         API_Index["POST /api/index"]
-        API_Query["POST /api/query"]
+        API_Query["POST /api/query (SSE Streaming)"]
         API_Repos["GET /api/repos"]
         
         Ingest["Ingestion: Git Shallow Clone"]
@@ -23,7 +24,8 @@ flowchart TD
         Parser["Tree-sitter AST Chunker (Functions/Classes)"]
         SQLite[("SQLite: Repo Metadata")]
         Chroma[("ChromaDB: Local Vector Store")]
-        RAG["RAG Engine (Context Assembly)"]
+        BM25["BM25 Keyword Index (Hybrid Search)"]
+        RAG["LangChain RAG Orchestrator"]
     end
 
     subgraph Cloud ["Google AI Studio (Free Tier)"]
@@ -36,52 +38,46 @@ flowchart TD
     Parser --> SQLite
     Parser -->|"Batch Texts"| Embed
     Embed -->|"Vectors"| Chroma
+    Parser -->|"Tokens"| BM25
 
     UI_Chat -->|"POST /api/query"| API_Query
     API_Query --> Embed
-    Embed -->|"Query Vector"| Chroma
-    Chroma -->|"Top 5 Chunks"| RAG
+    Embed -->|"Vector Search"| Chroma
+    API_Query -->|"Keyword Search"| BM25
+    Chroma & BM25 -->|"RRF Rank Fusion"| RAG
     RAG --> Flash
-    Flash -->|"Grounded Answer + Citations"| API_Query
+    Flash -->|"Token Stream (SSE)"| API_Query
     API_Query --> UI_Chat
+    UI_Chat -->|"Click Citation"| UI_Drawer
 ```
 
 ---
 
-## 2. Prerequisites to Prepare Before Starting
+## 2. Prerequisites & Environment Setup
 
-Since we are building a modern decoupled full-stack application, you will need two runtime environments installed on your machine:
-
-1. **Python 3.11 or 3.12** (For the AI & Backend):
-   - Download the official Windows installer from [python.org](https://www.python.org/downloads/).
-   - > [!IMPORTANT]
-     > On the very first installation screen, check the box: **"Add Python to PATH"**.
-2. **Node.js LTS (v20 or v22)** (For the Next.js Frontend):
-   - Download the **LTS installer** from [nodejs.org](https://nodejs.org/).
-   - Run the installer with default options. This installs `node` and `npm`.
-3. **Git** (Already verified):
-   - Git is already present on your system (`git version 2.55.0.windows.5`).
-4. **Google AI Studio API Key** (Free Tier):
-   - Visit [aistudio.google.com](https://aistudio.google.com/).
-   - Sign in and generate a free API key to paste into your backend `.env` file.
+All runtime dependencies are verified and available:
+* **Python 3.11+ / 3.14**: Runs the AI, LangChain, and FastAPI backend.
+* **Node.js LTS (v24)**: Runs the Next.js modern frontend.
+* **Git**: Handles shallow repository cloning.
+* **Google AI Studio Key**: Free API key from [aistudio.google.com](https://aistudio.google.com/) for embeddings and Gemini Flash.
 
 ---
 
-## 3. Free-Tier Rate Limits & System Safeguards
+## 3. Free-Tier Quotas & System Safeguards
 
-| Resource | Free-Tier Quota | System Safeguard |
+| Resource | Free-Tier Limit | Built-in Safeguard |
 | :--- | :--- | :--- |
-| **Embeddings (`text-embedding-004`)** | 1,500 Requests/min | **Batching**: Group 50–100 chunks per embedding request with exponential backoff retry. |
-| **Generation (Gemini Flash)** | 15 Requests/min, 1M Tokens/min, 1,500 Requests/day | **Top-5 RAG Context**: Passing only the top 5 chunks keeps token usage per question under ~4,000 tokens, well within limits. |
-| **Repo Scale** | Local disk & memory limit | **Smart Filtering**: Discard `.git`, `node_modules`, `dist`, images, binaries, and lockfiles. Cap repositories at 300 code files for initial testing. |
-| **Storage (ChromaDB + SQLite)** | Unlimited local storage | Zero cloud subscriptions. Runs completely out of `./backend/data/`. |
+| **Embeddings (`text-embedding-004`)** | 1,500 Requests/min | **Batching**: Group 50–100 code chunks per API call instead of one by one. Exponential backoff retry logic. |
+| **Generation (Gemini Flash)** | 15 Requests/min, 1M Tokens/min, 1,500 Requests/day | **Top-5 Context Retrieval**: Passing only the top 5 chunks keeps prompt size under ~4,000 tokens, far below the 1M token/min limit. |
+| **Repo Scale** | Local disk & RAM | **Smart Filtering**: Automatically exclude `.git`, `node_modules`, `dist`, images, binaries, and lockfiles. Cap repositories at 300 code files with a warning. |
+| **Storage (ChromaDB + SQLite)** | Unlimited local storage | Runs 100% locally on your machine at zero cost inside `backend/data/`. |
 
 ---
 
-## 4. Project Directory Structure
+## 4. Project Directory Layout
 
 ```text
-rag-codebase-assistant/
+repo-query-assistant/
 ├── backend/                       # Python FastAPI Application
 │   ├── data/
 │   │   ├── repos/                 # Cloned GitHub repositories
@@ -90,11 +86,12 @@ rag-codebase-assistant/
 │   ├── src/
 │   │   ├── __init__.py
 │   │   ├── config.py              # Settings & API keys
-│   │   ├── ingestion.py           # Git clone & file discovery
-│   │   ├── parser.py              # Tree-sitter AST chunker
+│   │   ├── ingestion.py           # Git clone & file discovery (Done!)
+│   │   ├── parser.py              # Tree-sitter AST chunker (Done!)
 │   │   ├── db.py                  # SQLite repo registry
 │   │   ├── indexer.py             # Batch embedding & ChromaDB storage
-│   │   └── rag_engine.py          # Similarity search & Gemini Flash QA
+│   │   ├── hybrid_search.py       # BM25 + Vector Reciprocal Rank Fusion
+│   │   └── rag_engine.py          # LangChain orchestration & Gemini Flash QA
 │   ├── main.py                    # FastAPI app & REST endpoints
 │   ├── requirements.txt           # Python dependencies
 │   └── .env                       # GOOGLE_API_KEY
@@ -106,9 +103,10 @@ rag-codebase-assistant/
     │   │   └── page.tsx           # Main Chat & Dashboard page
     │   ├── components/
     │   │   ├── RepoInput.tsx      # GitHub URL input & index trigger
-    │   │   ├── ChatWindow.tsx     # Message feed
+    │   │   ├── ChatWindow.tsx     # Message feed with streaming output
     │   │   ├── MessageBubble.tsx  # User & Assistant messages
-    │   │   └── CitationCard.tsx   # Expandable code snippets with line numbers
+    │   │   ├── CitationCard.tsx   # Expandable code snippets with line numbers
+    │   │   └── CodeDrawer.tsx     # Full Monaco editor / code inspector side panel
     │   └── services/
     │       └── api.ts             # Calls to FastAPI endpoints
     ├── package.json
@@ -121,74 +119,77 @@ rag-codebase-assistant/
 
 ### Phase 1: Python FastAPI Backend Core
 
-#### Step 1.0: Backend Setup
-- Create Python virtual environment (`.venv`).
-- Install dependencies: `fastapi`, `uvicorn`, `tree-sitter`, `tree-sitter-python`, `tree-sitter-javascript`, `chromadb`, `google-genai`, `python-dotenv`, `pydantic`.
-- Create `.env` file to hold `GOOGLE_API_KEY`.
+#### Step 1: Ingestion Module (`src/ingestion.py`) — ✅ Completed & Verified
+* Clones repos shallowly (`git clone --depth 1`) and filters out clutter (`node_modules`, `.git`, lockfiles, images).
 
-#### Step 1.1: Ingestion Module (`src/ingestion.py`)
-- Clone repos shallowly (`--depth 1`) using Git to save time and bandwidth.
-- Implement file-walking filter: keep only code files (`.py`, `.js`, `.ts`, `.go`, `.java`, etc.) while skipping noise (`node_modules`, `.git`, lockfiles, assets).
+#### Step 2: AST Code Chunker (`src/parser.py`) — ✅ Completed & Verified
+* Tree-sitter AST parser extracts whole functions, methods, and classes along with exact line numbers and metadata.
 
-#### Step 1.2: AST Code Chunker (`src/parser.py`)
-- Parse syntax using Tree-sitter.
-- Extract functions, methods, and classes as coherent semantic chunks.
-- Capture metadata: file path, enclosing class/function name, start line, end line.
+#### Step 3: SQLite Repository Registry (`src/db.py`)
+* Stores lightweight repo records (URL, local folder path, total chunks indexed, timestamp).
 
-#### Step 1.3: SQLite Metadata Store (`src/db.py`)
-- Store repository indexing status, URL, name, and total chunks indexed.
+#### Step 4: Batch Embeddings & ChromaDB Storage (`src/indexer.py`)
+* Batches extracted code chunks, sends them to Google `text-embedding-004` to generate 768-dim vectors, and persists them into local ChromaDB.
 
-#### Step 1.4: Indexer & ChromaDB (`src/indexer.py`)
-- Connect to persistent local ChromaDB.
-- Batch embed code chunks using Google `text-embedding-004`.
-- Store vector embeddings alongside chunk metadata.
+#### Step 5: LangChain RAG Query Engine (`src/rag_engine.py`)
+* **LangChain Orchestration**: Uses LangChain's `PromptTemplate`, `Document` schema, and `ChatGoogleGenerativeAI` to build a clean chain.
+* Retrieves top 5 most similar chunks from ChromaDB, formats the augmented prompt, and enforces exact file/function citations.
 
-#### Step 1.5: RAG Engine (`src/rag_engine.py`)
-- Embed incoming user questions.
-- Perform cosine similarity search in ChromaDB (retrieve top 5 chunks).
-- Construct grounded prompt for Gemini Flash enforcing file and function citations.
-
-#### Step 1.6: FastAPI Application (`main.py`)
-- Setup FastAPI with CORS enabled for `http://localhost:3000`.
-- Expose endpoints:
-  - `POST /api/index`: Start repo indexing and report progress.
-  - `POST /api/query`: Accept question, return answer + cited chunks list.
-  - `GET /api/repos`: Return list of currently indexed repositories.
-- **Milestone Verification**: Test all endpoints interactively in the browser via FastAPI's built-in Swagger UI (`http://localhost:8000/docs`).
+#### Step 6: FastAPI REST API (`main.py`)
+* Exposes endpoints (`POST /api/index`, `POST /api/query`, `GET /api/repos`) with CORS support and Swagger documentation (`http://localhost:8000/docs`).
 
 ---
 
 ### Phase 2: Next.js Modern Frontend
 
-#### Step 2.0: Next.js Scaffolding
-- Initialize Next.js project inside `./frontend`.
-- Configure modern dark-mode styles and typography.
+#### Step 7: Next.js Scaffolding & Setup
+* Scaffold the Next.js app in `/frontend` with modern dark mode styling.
 
-#### Step 2.1: API Service Layer (`frontend/src/services/api.ts`)
-- TypeScript client functions to call `http://localhost:8000/api/*`.
+#### Step 8: API Client & State Management
+* Build `services/api.ts` to communicate with the FastAPI backend asynchronously.
 
-#### Step 2.2: Repository Indexer Header (`RepoInput.tsx`)
-- Input box for GitHub repository URL.
-- "Index Codebase" button with loading spinners and status indicators.
-
-#### Step 2.3: Chat Interface & Citation Components
-- `ChatWindow.tsx`: Scrollable conversation feed.
-- `MessageBubble.tsx`: Formatted markdown responses from Gemini.
-- `CitationCard.tsx`: Collapsible cards displaying cited file paths, function names, line ranges, and syntax-highlighted code chunks.
+#### Step 9: UI Components
+* **Repo Bar**: URL input, "Index Codebase" button with loading status.
+* **Chat Window**: Interactive conversational message feed.
+* **Citation Cards**: Collapsible code snippets with syntax highlighting, file paths, and line badges.
 
 ---
 
-## 6. Verification Plan
+### Phase 3: Zero-Cost Deployment
 
-1. **Prerequisites Check**: Verify `python --version` and `node -v` run in terminal.
-2. **Backend Unit Tests**:
-   - Test cloning a tiny public repository (e.g., a sample 2-file Python repo).
-   - Test Tree-sitter parsing of functions and classes.
-   - Verify ChromaDB creates local vector collections in `./backend/data/chroma_db/`.
-3. **Swagger UI Validation**:
-   - Run `uvicorn main:app --reload` on port 8000.
-   - Open `http://localhost:8000/docs` in your browser.
-   - Submit a test query and confirm cited file/function metadata in the JSON response.
-4. **End-to-End Integration**:
-   - Run both servers concurrently (`uvicorn` on 8000, `npm run dev` on 3000).
-   - Index a repository from the Next.js UI, ask a question, and verify the answer and citation cards render seamlessly.
+#### Step 10: Deploy Frontend to Vercel
+* Connect your GitHub repo to Vercel (free tier, instant global CDN deployment).
+
+#### Step 11: Deploy Backend to Render / Railway
+* Deploy the FastAPI backend service using Render or Railway's free tier with environment variable configuration.
+
+---
+
+### Phase 4: Advanced Capstone Enhancements (Post-Deployment)
+
+These 4 high-signal features will elevate this project from a standard prototype into a standout portfolio capstone:
+
+#### Feature 4.1: Hybrid Search (BM25 Keyword + Dense Vector with RRF)
+* **What it is**: Dense vectors excel at conceptual meaning, but struggle with exact variable names (e.g., `JWT_SECRET`). BM25 excels at exact keywords.
+* **Implementation**: We combine BM25 scoring with ChromaDB cosine distance using **Reciprocal Rank Fusion (RRF)** to deliver state-of-the-art retrieval accuracy.
+
+#### Feature 4.2: Real-Time Token Streaming (Server-Sent Events)
+* **What it is**: Instead of waiting 5 seconds for a response to finish, tokens stream onto the screen word-by-word via FastAPI `StreamingResponse` and EventSource in Next.js.
+
+#### Feature 4.3: Interactive Code Inspector Drawer with GitHub Deep Links
+* **What it is**: Clicking any citation opens a sleek slide-out drawer featuring a full syntax-highlighted code viewer and an instant **"Open lines X-Y on GitHub"** direct link.
+
+#### Feature 4.4: Automated RAG Hallucination & Faithfulness Metric
+* **What it is**: A built-in evaluation function that checks if every statement generated by the LLM is directly supported by the retrieved code, outputting a numerical Faithfulness Score.
+
+---
+
+## 6. Verification & Milestone Testing Plan
+
+1. **Step 1 Verification**: `python backend/test_clone.py` (Confirmed).
+2. **Step 2 Verification**: `python backend/test_parser.py` (Confirmed).
+3. **Step 3 & 4 Verification**: Embed test chunks into ChromaDB and query them to verify vector search returns expected code.
+4. **Step 5 Verification**: Ask a sample question via CLI and verify LangChain + Gemini Flash returns a cited response.
+5. **Step 6 Verification**: Launch `uvicorn main:app --reload` and test all endpoints via FastAPI's interactive Swagger UI at `http://localhost:8000/docs`.
+6. **Step 7–9 Verification**: Launch `npm run dev` and test full end-to-end question answering in the Next.js browser interface.
+7. **Post-Deployment Verification**: Validate live Vercel frontend communicating with the deployed FastAPI backend.

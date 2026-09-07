@@ -1,3 +1,36 @@
+"""
+===============================================================================
+FILE: backend/src/parser.py
+MODULE: Tree-sitter Abstract Syntax Tree (AST) Code Chunker
+
+WHAT THIS FILE DOES:
+--------------------
+This module converts raw source code files into semantically meaningful code chunks.
+Unlike naive RAG systems that slice code by arbitrary line counts (which cuts
+functions in half and destroys program logic), this module uses Tree-sitter to
+parse the code into an Abstract Syntax Tree (AST) and extracts complete functions,
+methods, and classes with their docstrings and comments intact.
+
+KEY RESPONSIBILITIES & IMPLEMENTATIONS:
+1. Multi-Language AST Grammar Support:
+   - Python: uses `tree-sitter-python` to identify `function_definition` and `class_definition`.
+   - JavaScript/TypeScript: uses `tree-sitter-javascript` to identify `function_declaration`,
+     `class_declaration`, `method_definition`, and `arrow_function`.
+2. Semantic Chunk Extraction (`_extract_tree_sitter_chunks`):
+   - Traverses the syntax tree.
+   - Extracts complete nodes from start_byte to end_byte.
+   - Preserves 1-indexed start and end line numbers.
+   - Captures entity names (e.g. `def login_user(...)` -> name: "login_user").
+3. Smart Block Fallback (`_fallback_line_chunker`):
+   - For non-code or unsupported formats (Markdown, CSS, JSON), it breaks text
+     into 60-line windows with a 10-line overlap so no sentences are broken.
+4. Main Entrypoint (`chunk_file`):
+   - Reads bytes safely, detects language extension, routes to AST or fallback,
+     and returns structured chunk dictionaries containing:
+     [chunk_id, file_path, entity_type, entity_name, start_line, end_line, code].
+===============================================================================
+"""
+
 import os
 from pathlib import Path
 from typing import List, Dict, Any, Optional

@@ -1,3 +1,21 @@
+"""
+===============================================================================
+FILE: backend/test_clone.py
+SCRIPT: Step 1 Verification (GitHub Ingestion & File Discovery)
+
+WHAT THIS SCRIPT DOES:
+----------------------
+This is an interactive verification tool to test the GitHub ingestion engine
+(`src/ingestion.py`) in isolation before any parsing or database steps.
+
+WHAT IT TESTS:
+1. Prompts for a public GitHub repository URL (with a sensible default).
+2. Clones the repository shallowly (`--depth 1`) into `backend/data/repos/`.
+3. Runs the noise filter to scan the folder and prints all discovered code files
+   along with their relative paths and file sizes in KB.
+===============================================================================
+"""
+
 import sys
 from pathlib import Path
 
