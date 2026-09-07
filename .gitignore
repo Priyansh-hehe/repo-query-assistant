@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+
+# Environment variables
+.env
+
+# Cloned GitHub Repositories (Stored locally for RAG)
+backend/data/repos/*
+!backend/data/repos/.gitkeep
+
+# Local Databases
+backend/data/chroma_db/
+backend/data/*.db
+
+# Node.js
+node_modules/
+.next/
+dist/
+build/
