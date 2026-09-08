@@ -194,8 +194,12 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
             </div>
             <div className="flex items-center gap-3 font-mono text-xs text-emerald-700 dark:text-emerald-400">
               <span>{latestStats.total_chunks} chunks</span>
-              <span>&bull;</span>
-              <span>{latestStats.duration_seconds.toFixed(1)}s</span>
+              {typeof latestStats.duration_seconds === "number" && (
+                <>
+                  <span>&bull;</span>
+                  <span>{latestStats.duration_seconds.toFixed(1)}s</span>
+                </>
+              )}
             </div>
           </div>
         )}

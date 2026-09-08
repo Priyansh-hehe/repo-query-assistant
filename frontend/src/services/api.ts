@@ -50,7 +50,7 @@ export interface RepoListResponse {
 export interface IndexStats {
   repo_name: string;
   total_chunks: number;
-  duration_seconds: number;
+  duration_seconds?: number;
 }
 
 export interface IndexResponse {

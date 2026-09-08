@@ -88,6 +88,7 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
     5. Record metadata in SQLite
     """
     init_db()
+    start_time = time.time()
 
     # Step 1: Ingestion
     repo_name = parse_repo_name_from_url(repo_url)
@@ -114,6 +115,11 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
         raise ValueError("Failed to extract any code chunks from the files.")
 
     # Step 4 & 5: Local ONNX Embedding & ChromaDB Storage
+    # Reset collection so re-indexing is completely fresh without stale or orphan chunks
+    try:
+        get_chroma_client().delete_collection(name=sanitize_collection_name(repo_name))
+    except Exception:
+        pass
     collection = get_or_create_collection(repo_name)
     total_chunks = len(all_chunks)
 
@@ -151,11 +157,14 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
     )
     clear_repo_cache(repo_name)
 
+    duration_seconds = round(time.time() - start_time, 2)
+
     return {
         "repo_name": repo_name,
         "repo_path": str(repo_path),
         "total_files": len(code_files),
-        "total_chunks": total_chunks
+        "total_chunks": total_chunks,
+        "duration_seconds": duration_seconds
     }
 
 

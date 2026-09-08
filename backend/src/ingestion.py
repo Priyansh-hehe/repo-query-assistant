@@ -71,6 +71,26 @@ SUPPORTED_NAMES_WITHOUT_EXT = {
     "readme", "license", "dockerfile", "makefile"
 }
 
+# Dependency lockfiles and build noise to always exclude from indexing
+# (Lockfiles contain 10,000+ lines of package hashes that drastically slow down indexing)
+IGNORED_FILE_NAMES = {
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "poetry.lock",
+    "cargo.lock",
+    "composer.lock",
+    "pipfile.lock",
+    "gemfile.lock",
+}
+
+IGNORED_SUFFIXES = (
+    ".min.js",
+    ".min.css",
+    ".map",
+    ".lock",
+)
+
 # Skip any individual file larger than 1MB (avoids minified bundles, big datasets)
 MAX_FILE_SIZE_BYTES = 1024 * 1024  # 1 MB
 
@@ -139,12 +159,17 @@ def discover_code_files(repo_path: Path) -> List[Dict[str, Any]]:
         dirs[:] = [d for d in dirs if d not in IGNORED_DIRECTORIES and not d.startswith(".")]
 
         for file_name in files:
+            lower_name = file_name.lower()
+            # Skip dependency lockfiles and minified bundles
+            if lower_name in IGNORED_FILE_NAMES or lower_name.endswith(IGNORED_SUFFIXES):
+                continue
+
             file_path = Path(root) / file_name
             ext = file_path.suffix.lower()
 
             # Only accept supported code extensions or known extensionless files
             is_valid_ext = ext in SUPPORTED_EXTENSIONS
-            is_valid_name = file_name.lower() in SUPPORTED_NAMES_WITHOUT_EXT
+            is_valid_name = lower_name in SUPPORTED_NAMES_WITHOUT_EXT
             if not (is_valid_ext or is_valid_name):
                 continue
 

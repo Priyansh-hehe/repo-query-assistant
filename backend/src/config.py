@@ -53,8 +53,8 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "").strip()
 EMBEDDING_PROVIDER = "local_onnx"
 EMBEDDING_MODEL = "all-MiniLM-L6-v2 (Local ONNX)"
 
-# Chat reasoning model uses Google Gemini 3.6 Flash
-GENERATION_MODEL = "gemini-3.6-flash"
+# Chat reasoning model uses Google Gemini 3.5 Flash Lite (0.9s sub-second responses)
+GENERATION_MODEL = "gemini-3.5-flash-lite"
 
 # Local ONNX batch size (can process large batches locally with zero network latency)
 EMBEDDING_BATCH_SIZE = 100
