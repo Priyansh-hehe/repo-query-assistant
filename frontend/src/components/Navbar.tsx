@@ -1,25 +1,21 @@
 /**
  * ===============================================================================
  * FILE: frontend/src/components/Navbar.tsx
- * COMPONENT: Navigation Header & Live Backend Health Monitor
+ * COMPONENT: Navigation Header, Health Monitor & Theme Switcher
  * 
  * WHAT THIS FILE DOES:
  * --------------------
- * 1. Displays the top-level application branding and identity: "Codebase RAG".
- * 2. Features an automated live backend health monitor that displays whether
- *    the FastAPI server on port 8000 is online or offline in real-time.
- * 
- * WHY IT MATTERS FOR DEVELOPER EXPERIENCE:
- * ----------------------------------------
- * In decoupled architectures (Next.js frontend on 3000, FastAPI backend on 8000),
- * developers often forget to start the backend or wonder why queries fail silently.
- * This component provides immediate visual feedback via a pulsating status dot.
+ * 1. Displays the clean application branding: "Intelligent Code Query Engine".
+ * 2. Provides a Live Backend Health Monitor for the FastAPI server (:8000).
+ * 3. Includes an interactive Dark / Light mode switcher with local persistence.
+ * 4. Links to the interactive Swagger UI API documentation.
  * ===============================================================================
  */
 
 "use client";
 
 import React from "react";
+import ThemeToggle from "./ThemeToggle";
 
 interface NavbarProps {
   isBackendOnline: boolean | null; // null = checking, true = healthy, false = disconnected
@@ -27,47 +23,26 @@ interface NavbarProps {
 
 export default function Navbar({ isBackendOnline }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Brand & Tagline */}
-        <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-              />
-            </svg>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg text-white tracking-tight">
-                Codebase<span className="text-cyan-400">RAG</span>
-              </span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-mono">
-                v1.0
-              </span>
-            </div>
-            <p className="text-xs text-zinc-400 hidden sm:block">
-              Tree-sitter AST &bull; ChromaDB ONNX &bull; Gemini 3.6 Flash
-            </p>
-          </div>
+        {/* Brand Name */}
+        <div>
+          <h1 className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white tracking-tight">
+            Intelligent Code Query Engine
+          </h1>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 font-mono hidden sm:block">
+            Grounded Retrieval-Augmented Generation with Verified Citations
+          </p>
         </div>
 
-        {/* Live Backend Connectivity Indicator */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-800 text-xs font-medium">
+        {/* Status, Theme Switcher & Links */}
+        <div className="flex items-center gap-3">
+          {/* Live Backend Connectivity Indicator */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs font-medium transition-colors">
             {isBackendOnline === null ? (
               <>
                 <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-                <span className="text-zinc-400">Connecting to API...</span>
+                <span className="text-zinc-500 dark:text-zinc-400">Checking API...</span>
               </>
             ) : isBackendOnline ? (
               <>
@@ -75,23 +50,27 @@ export default function Navbar({ isBackendOnline }: NavbarProps) {
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                 </span>
-                <span className="text-emerald-400">FastAPI Online :8000</span>
+                <span className="text-emerald-600 dark:text-emerald-400">FastAPI Online :8000</span>
               </>
             ) : (
               <>
                 <span className="h-2 w-2 rounded-full bg-rose-500" />
-                <span className="text-rose-400">Backend Disconnected</span>
+                <span className="text-rose-600 dark:text-rose-400">Backend Disconnected</span>
               </>
             )}
           </div>
 
+          {/* Dark / Light Theme Toggle */}
+          <ThemeToggle />
+
+          {/* Swagger UI link */}
           <a
             href="http://localhost:8000/docs"
             target="_blank"
             rel="noreferrer"
-            className="text-xs text-zinc-400 hover:text-cyan-400 transition-colors hidden md:flex items-center gap-1"
+            className="text-xs text-zinc-500 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors hidden md:flex items-center gap-1"
           >
-            <span>Swagger UI</span>
+            <span>Docs</span>
             <svg
               className="w-3.5 h-3.5"
               fill="none"

@@ -38,9 +38,9 @@ export default function RepoSelector({
   const currentRepo = repositories.find((r) => r.repo_name === selectedRepo);
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 bg-zinc-900/40 border border-zinc-800/80 rounded-xl">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 rounded-xl shadow-sm transition-colors">
       <div className="flex items-center gap-2.5">
-        <div className="p-1.5 rounded-lg bg-zinc-800 text-zinc-300">
+        <div className="p-1.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
           <svg
             className="w-4 h-4"
             fill="none"
@@ -56,8 +56,8 @@ export default function RepoSelector({
           </svg>
         </div>
         <div>
-          <span className="text-xs font-medium text-zinc-400">Target Codebase:</span>
-          <div className="text-sm font-semibold text-white">
+          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Target Codebase:</span>
+          <div className="text-sm font-semibold text-zinc-900 dark:text-white">
             {currentRepo ? currentRepo.repo_name : "No repository selected"}
           </div>
         </div>
@@ -68,7 +68,7 @@ export default function RepoSelector({
           value={selectedRepo}
           onChange={(e) => onSelectRepo(e.target.value)}
           disabled={isLoading || repositories.length === 0}
-          className="w-full sm:w-64 px-3 py-1.5 text-xs rounded-lg bg-zinc-950 border border-zinc-700 text-zinc-200 focus:outline-none focus:ring-1 focus:ring-cyan-400 transition-colors disabled:opacity-50"
+          className="w-full sm:w-64 px-3 py-1.5 text-xs rounded-lg bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 focus:outline-none focus:ring-1 focus:ring-cyan-500 transition-colors disabled:opacity-50"
         >
           {repositories.length === 0 ? (
             <option value="">No indexed repos found</option>
@@ -82,7 +82,7 @@ export default function RepoSelector({
         </select>
 
         {currentRepo && (
-          <span className="text-[11px] px-2 py-1 rounded bg-zinc-800 border border-zinc-700 text-cyan-400 font-mono hidden md:inline-block">
+          <span className="text-[11px] px-2 py-1 rounded bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-cyan-600 dark:text-cyan-400 font-mono hidden md:inline-block">
             {currentRepo.total_chunks} chunks
           </span>
         )}

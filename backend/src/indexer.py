@@ -37,7 +37,7 @@ from src.config import (
 )
 from src.ingestion import clone_repository, discover_code_files, parse_repo_name_from_url
 from src.parser import chunk_file
-from src.db import init_db, register_or_update_repo
+from src.db import init_db, register_or_update_repo, clear_repo_cache
 
 
 def get_chroma_client() -> chromadb.PersistentClient:
@@ -142,13 +142,14 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
         if progress_callback:
             progress_callback(f"Progress: {processed_count}/{total_chunks} chunks indexed...")
 
-    # Step 6: Save repo record in SQLite
+    # Step 6: Save repo record in SQLite & invalidate stale query cache
     register_or_update_repo(
         repo_name=repo_name,
         repo_url=repo_url,
         local_path=str(repo_path),
         total_chunks=total_chunks
     )
+    clear_repo_cache(repo_name)
 
     return {
         "repo_name": repo_name,

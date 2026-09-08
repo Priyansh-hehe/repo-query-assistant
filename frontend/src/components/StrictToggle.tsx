@@ -36,13 +36,13 @@ export default function StrictToggle({
   disabled = false,
 }: StrictToggleProps) {
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/60 border border-zinc-800">
+    <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-sm transition-colors">
       <div className="flex items-center gap-2.5">
         <div
           className={`p-1.5 rounded-lg transition-colors ${
             strictMode
-              ? "bg-amber-500/20 text-amber-400 border border-amber-500/30"
-              : "bg-zinc-800 text-zinc-400"
+              ? "bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30"
+              : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
           }`}
         >
           <svg
@@ -61,16 +61,16 @@ export default function StrictToggle({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-zinc-200">
+            <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
               Strict Zero-Hallucination Mode
             </span>
             {strictMode && (
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30">
                 Guarded
               </span>
             )}
           </div>
-          <p className="text-[11px] text-zinc-400">
+          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
             {strictMode
               ? "Refuses speculation. Only answers from verified code chunks."
               : "Balanced mode: Conversational reasoning with grounded citations."}
@@ -86,7 +86,7 @@ export default function StrictToggle({
         disabled={disabled}
         onClick={() => onToggle(!strictMode)}
         className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-          strictMode ? "bg-amber-500" : "bg-zinc-700"
+          strictMode ? "bg-amber-500" : "bg-zinc-300 dark:bg-zinc-700"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <span

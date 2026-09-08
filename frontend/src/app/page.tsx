@@ -118,6 +118,7 @@ export default function Home() {
         sender: "assistant",
         text: result.answer,
         citations: result.citations,
+        cached: result.cached,
         timestamp: new Date().toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -144,7 +145,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200 transition-colors">
       {/* Top Navigation */}
       <Navbar isBackendOnline={isBackendOnline} />
 
@@ -152,14 +153,14 @@ export default function Home() {
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
         {/* Backend Warning Banner if Offline */}
         {isBackendOnline === false && (
-          <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-800/80 text-amber-300 text-sm flex items-start sm:items-center justify-between gap-4">
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 text-amber-800 dark:text-amber-300 text-sm flex items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <span className="text-xl">⚠️</span>
               <div>
                 <p className="font-semibold">FastAPI Backend is not reachable</p>
-                <p className="text-xs text-amber-400/80 mt-0.5">
+                <p className="text-xs text-amber-700 dark:text-amber-400/80 mt-0.5">
                   Ensure the server is running by executing:{" "}
-                  <code className="px-2 py-0.5 rounded bg-zinc-900 font-mono text-zinc-200">
+                  <code className="px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-900 font-mono text-zinc-800 dark:text-zinc-200">
                     python backend/main.py
                   </code>
                 </p>
@@ -167,7 +168,7 @@ export default function Home() {
             </div>
             <button
               onClick={verifyBackendHealth}
-              className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-medium border border-amber-500/30 transition-colors flex-shrink-0"
+              className="px-3 py-1.5 rounded-lg bg-amber-200 dark:bg-amber-500/20 hover:bg-amber-300 dark:hover:bg-amber-500/30 text-amber-900 dark:text-amber-300 text-xs font-medium border border-amber-300 dark:border-amber-500/30 transition-colors flex-shrink-0"
             >
               Retry Connection
             </button>
@@ -196,20 +197,20 @@ export default function Home() {
             </div>
 
             {/* Architectural Highlights Card */}
-            <div className="p-4 rounded-xl bg-zinc-900/30 border border-zinc-800/60 text-xs text-zinc-400 space-y-2">
-              <div className="font-semibold text-zinc-300 flex items-center gap-1.5">
+            <div className="p-4 rounded-xl bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800/80 shadow-sm text-xs text-zinc-600 dark:text-zinc-400 space-y-2 transition-colors">
+              <div className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
                 <span>💡</span>
                 <span>Zero-Cost Tech Stack</span>
               </div>
-              <ul className="space-y-1 text-[11px] list-disc list-inside text-zinc-400">
+              <ul className="space-y-1 text-[11px] list-disc list-inside text-zinc-600 dark:text-zinc-400">
                 <li>
-                  <strong className="text-zinc-300">Tree-sitter:</strong> AST-aware chunking preserving functions & line bounds.
+                  <strong className="text-zinc-800 dark:text-zinc-200">Tree-sitter:</strong> AST-aware chunking preserving functions & line bounds.
                 </li>
                 <li>
-                  <strong className="text-zinc-300">ChromaDB ONNX:</strong> Local embeddings in 5s with zero rate limits.
+                  <strong className="text-zinc-800 dark:text-zinc-200">ChromaDB ONNX:</strong> Local embeddings in 5s with zero rate limits.
                 </li>
                 <li>
-                  <strong className="text-zinc-300">Gemini 3.6 Flash:</strong> Fast free-tier reasoning with 100% cited answers.
+                  <strong className="text-zinc-800 dark:text-zinc-200">Gemini 3.6 Flash:</strong> Fast free-tier reasoning with 100% cited answers.
                 </li>
               </ul>
             </div>

@@ -189,12 +189,34 @@ def query_repository_codebase(request: QueryCodebaseRequest):
             top_k=request.top_k,
             strict_mode=request.strict_mode
         )
+
+        # Construct direct GitHub line anchors for every citation
+        clean_repo_url = existing_repo.get("repo_url", "").rstrip("/")
+        if clean_repo_url.endswith(".git"):
+            clean_repo_url = clean_repo_url[:-4]
+
+        enriched_citations = []
+        for c in result.get("citations", []):
+            start = c.get("start_line", 1)
+            end = c.get("end_line", 1)
+            line_anchor = f"#L{start}-L{end}" if start != end else f"#L{start}"
+            github_url = f"{clean_repo_url}/blob/HEAD/{c.get('file_path', '')}{line_anchor}" if clean_repo_url else None
+            code_text = c.get("code") or c.get("snippet", "")
+
+            enriched_citations.append({
+                **c,
+                "snippet": code_text,
+                "code": code_text,
+                "github_url": github_url
+            })
+
         return {
             "repo_name": request.repo_name,
             "question": request.question,
             "strict_mode": request.strict_mode,
             "answer": result["answer"],
-            "citations": result["citations"]
+            "citations": enriched_citations,
+            "cached": result.get("cached", False)
         }
     except Exception as e:
         raise HTTPException(

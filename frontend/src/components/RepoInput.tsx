@@ -70,24 +70,24 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
   };
 
   return (
-    <div className="w-full bg-zinc-900/60 border border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-xl backdrop-blur-sm">
+    <div className="w-full bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-xl backdrop-blur-sm transition-colors">
       <div className="flex flex-col gap-3">
         {/* Header Title & Badges */}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-cyan-400" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-300">
+            <span className="flex h-2.5 w-2.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
               Ingest & Index Codebase
             </h2>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
-            <span className="px-2 py-0.5 rounded bg-zinc-800/80 border border-zinc-700/60">
+          <div className="flex items-center gap-2 text-[11px] text-zinc-600 dark:text-zinc-400 font-mono">
+            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60">
               ⚡ Shallow Clone (--depth 1)
             </span>
-            <span className="px-2 py-0.5 rounded bg-zinc-800/80 border border-zinc-700/60">
+            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60">
               🌳 Tree-sitter AST
             </span>
-            <span className="px-2 py-0.5 rounded bg-zinc-800/80 border border-zinc-700/60 hidden sm:inline">
+            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 hidden sm:inline">
               🧠 Local ONNX Vectors
             </span>
           </div>
@@ -96,7 +96,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
         {/* Input Form */}
         <form onSubmit={handleIndexSubmit} className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-500">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400 dark:text-zinc-500">
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -117,7 +117,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="https://github.com/psf/requests"
               disabled={isLoading}
-              className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50"
+              className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50"
             />
           </div>
 
@@ -172,9 +172,9 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
             <svg
-              className="w-4 h-4 flex-shrink-0 text-rose-400"
+              className="w-4 h-4 flex-shrink-0 text-rose-500 dark:text-rose-400"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -192,10 +192,10 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
 
         {/* Success Alert with Indexing Stats */}
         {latestStats && (
-          <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 text-emerald-300 text-xs flex items-center justify-between">
+          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between">
             <div className="flex items-center gap-2">
               <svg
-                className="w-4 h-4 flex-shrink-0 text-emerald-400"
+                className="w-4 h-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -209,10 +209,10 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
               </svg>
               <span>
                 Successfully indexed{" "}
-                <strong className="text-white">{latestStats.repo_name}</strong> into ChromaDB!
+                <strong className="text-zinc-900 dark:text-white">{latestStats.repo_name}</strong> into ChromaDB!
               </span>
             </div>
-            <div className="flex items-center gap-3 font-mono text-[11px] text-emerald-400/90">
+            <div className="flex items-center gap-3 font-mono text-[11px] text-emerald-700 dark:text-emerald-400/90">
               <span>{latestStats.total_chunks} chunks</span>
               <span>&bull;</span>
               <span>{latestStats.duration_seconds.toFixed(1)}s</span>

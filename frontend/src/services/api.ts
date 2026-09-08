@@ -64,7 +64,9 @@ export interface Citation {
   entity_name: string;
   start_line: number;
   end_line: number;
-  snippet: string;
+  snippet?: string;
+  code?: string;
+  github_url?: string;
 }
 
 export interface QueryResponse {
@@ -73,6 +75,7 @@ export interface QueryResponse {
   strict_mode: boolean;
   answer: string;
   citations: Citation[];
+  cached?: boolean;
 }
 
 // =============================================================================

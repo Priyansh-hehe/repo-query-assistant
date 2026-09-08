@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Codebase RAG | Grounded Code Intelligence",
-  description: "Zero-cost codebase intelligence powered by Tree-sitter AST, ChromaDB ONNX, and Google Gemini.",
+  title: "Intelligent Code Query Engine",
+  description: "Grounded codebase question-answering with verified AST line citations.",
 };
 
 export default function RootLayout({
@@ -25,9 +25,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 transition-colors">
+        {children}
+      </body>
     </html>
   );
 }
