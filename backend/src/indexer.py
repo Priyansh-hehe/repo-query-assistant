@@ -129,7 +129,12 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
     # Process in batches of 100 locally
     for i in range(0, total_chunks, EMBEDDING_BATCH_SIZE):
         batch = all_chunks[i:i + EMBEDDING_BATCH_SIZE]
-        batch_texts = [c["code"] for c in batch]
+        # Include file path and entity name in embedded text so semantic queries matching
+        # folder/file names (like 'actions', 'api', 'auth') retrieve the exact files!
+        batch_texts = [
+            f"File: {c['file_path']}\nEntity: {c['entity_type']} {c['entity_name']}\n\n{c['code']}"
+            for c in batch
+        ]
 
         # ChromaDB automatically embeds and stores documents locally
         collection.upsert(

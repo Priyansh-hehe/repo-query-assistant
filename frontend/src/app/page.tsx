@@ -122,7 +122,7 @@ export default function Home() {
     setIsQuerying(true);
 
     try {
-      const result = await queryCodebase(selectedRepo, question, strictMode, 5);
+      const result = await queryCodebase(selectedRepo, question, strictMode, 8);
 
       const assistantMsg: ChatMessage = {
         id: `assistant-${Date.now()}`,
