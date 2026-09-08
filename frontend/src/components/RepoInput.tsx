@@ -1,22 +1,23 @@
 /**
  * ===============================================================================
  * FILE: frontend/src/components/RepoInput.tsx
- * COMPONENT: GitHub Repository Ingestion & Indexing Bar
+ * COMPONENT: Prominent Repository URL Ingestion Bar
  * 
  * WHAT THIS FILE DOES:
  * --------------------
- * 1. Provides a clean input bar for developers to paste any public GitHub URL.
+ * 1. Provides a prominent, full-width input space in the center of the application
+ *    for developers to paste any public GitHub repository URL.
  * 2. Invokes the backend `POST /api/index` endpoint via our typed `api.ts` client.
  * 3. Shows animated loading states while the backend clones, parses AST, and
  *    embeds the codebase into ChromaDB.
- * 4. Displays real-time indexing statistics (number of AST chunks parsed and
- *    seconds elapsed) upon completion.
+ * 4. Displays real-time indexing statistics upon completion and notifies parent
+ *    components to register the new repo in the 3-bar sidebar drawer.
  * 
- * DESIGN HIGHLIGHTS:
- * -------------------
- * - Micro-indicators highlighting zero-cost architecture (Tree-sitter, Local ONNX).
- * - Graceful error handling for invalid URLs or network failures.
- * - Auto-triggers refresh of the repository list once indexing succeeds.
+ * USER EXPERIENCE HIGHLIGHTS:
+ * ----------------------------
+ * - Clean, non-gimmicky developer aesthetics (no distracting AI badges).
+ * - High-contrast focus rings and keyboard-friendly submission.
+ * - Clear error states for malformed or inaccessible GitHub URLs.
  * ===============================================================================
  */
 
@@ -70,33 +71,13 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
   };
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-xl backdrop-blur-sm transition-colors">
-      <div className="flex flex-col gap-3">
-        {/* Header Title & Badges */}
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="flex h-2.5 w-2.5 rounded-full bg-cyan-500 dark:bg-cyan-400" />
-            <h2 className="text-sm font-semibold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-              Ingest & Index Codebase
-            </h2>
-          </div>
-          <div className="flex items-center gap-2 text-[11px] text-zinc-600 dark:text-zinc-400 font-mono">
-            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60">
-              ⚡ Shallow Clone (--depth 1)
-            </span>
-            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60">
-              🌳 Tree-sitter AST
-            </span>
-            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 border border-zinc-200 dark:border-zinc-700/60 hidden sm:inline">
-              🧠 Local ONNX Vectors
-            </span>
-          </div>
-        </div>
-
-        {/* Input Form */}
-        <form onSubmit={handleIndexSubmit} className="flex flex-col sm:flex-row gap-3">
+    <div className="w-full bg-white dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-xl backdrop-blur-sm transition-colors">
+      <form onSubmit={handleIndexSubmit} className="space-y-3">
+        {/* Prominent Wide Input Bar */}
+        <div className="flex flex-col sm:flex-row gap-3 items-stretch">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-zinc-400 dark:text-zinc-500">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 dark:text-zinc-500">
+              {/* GitHub Link Icon */}
               <svg
                 className="w-5 h-5"
                 fill="none"
@@ -115,16 +96,16 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
               type="url"
               value={repoUrl}
               onChange={(e) => setRepoUrl(e.target.value)}
-              placeholder="https://github.com/psf/requests"
+              placeholder="Paste public GitHub repository link (e.g. https://github.com/psf/requests)..."
               disabled={isLoading}
-              className="w-full pl-11 pr-4 py-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50"
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50 font-normal"
             />
           </div>
 
           <button
             type="submit"
             disabled={isLoading || !repoUrl.trim()}
-            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-w-[150px]"
+            className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-sm font-semibold shadow-md shadow-cyan-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 flex-shrink-0"
           >
             {isLoading ? (
               <>
@@ -147,7 +128,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                <span>Indexing Code...</span>
+                <span>Indexing Repository...</span>
               </>
             ) : (
               <>
@@ -168,11 +149,11 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
               </>
             )}
           </button>
-        </form>
+        </div>
 
         {/* Error Alert */}
         {errorMessage && (
-          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-xs flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-800 dark:text-rose-300 text-sm flex items-center gap-2.5">
             <svg
               className="w-4 h-4 flex-shrink-0 text-rose-500 dark:text-rose-400"
               fill="none"
@@ -192,8 +173,8 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
 
         {/* Success Alert with Indexing Stats */}
         {latestStats && (
-          <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-xs flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/60 text-emerald-800 dark:text-emerald-300 text-sm flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
               <svg
                 className="w-4 h-4 flex-shrink-0 text-emerald-500 dark:text-emerald-400"
                 fill="none"
@@ -208,18 +189,17 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
                 />
               </svg>
               <span>
-                Successfully indexed{" "}
-                <strong className="text-zinc-900 dark:text-white">{latestStats.repo_name}</strong> into ChromaDB!
+                Indexed <strong className="text-zinc-900 dark:text-white font-mono">{latestStats.repo_name}</strong> into local vector store.
               </span>
             </div>
-            <div className="flex items-center gap-3 font-mono text-[11px] text-emerald-700 dark:text-emerald-400/90">
+            <div className="flex items-center gap-3 font-mono text-xs text-emerald-700 dark:text-emerald-400">
               <span>{latestStats.total_chunks} chunks</span>
               <span>&bull;</span>
               <span>{latestStats.duration_seconds.toFixed(1)}s</span>
             </div>
           </div>
         )}
-      </div>
+      </form>
     </div>
   );
 }

@@ -8,15 +8,8 @@
  * 1. Provides an intuitive UI switch allowing developers to toggle between
  *    Balanced Conversational Mode and Strict Zero-Hallucination Mode.
  * 2. Visualizes the exact operational behavior of the underlying Gemini prompt.
- * 
- * INTERVIEW & ARCHITECTURAL HIGHLIGHT:
- * -------------------------------------
- * Standard LLMs often hallucinate method signatures or invent plausible-sounding
- * logic when queried about internal codebases. Our dual-mode system gives developers
- * full control:
- * - Balanced: Natural conversational flow, polite greetings, and cited repository QA.
- * - Strict: Hardcoded zero-hallucination boundary. The LLM is forbidden from
- *   speculating and must strictly ground all statements in verified AST chunks.
+ * 3. Supports a `compact` mode specifically designed to sit gracefully inside
+ *    the top navigation bar without taking up main screen real estate.
  * ===============================================================================
  */
 
@@ -28,18 +21,51 @@ interface StrictToggleProps {
   strictMode: boolean;
   onToggle: (newValue: boolean) => void;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 export default function StrictToggle({
   strictMode,
   onToggle,
   disabled = false,
+  compact = false,
 }: StrictToggleProps) {
+  // Compact navbar pill representation
+  if (compact) {
+    return (
+      <button
+        type="button"
+        role="switch"
+        aria-checked={strictMode}
+        disabled={disabled}
+        onClick={() => onToggle(!strictMode)}
+        title={
+          strictMode
+            ? "Strict Zero-Hallucination Mode: Active (Refuses speculation, strictly grounded)"
+            : "Balanced Mode: Conversational reasoning with grounded citations"
+        }
+        className={`px-3.5 py-1.5 rounded-full text-sm font-medium border flex items-center gap-2 transition-all ${
+          strictMode
+            ? "bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-400 shadow-sm"
+            : "bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
+        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+      >
+        <span
+          className={`h-2.5 w-2.5 rounded-full transition-colors ${
+            strictMode ? "bg-amber-500 animate-pulse" : "bg-zinc-400 dark:bg-zinc-600"
+          }`}
+        />
+        <span>Strict Mode</span>
+      </button>
+    );
+  }
+
+  // Full card representation
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-sm transition-colors">
-      <div className="flex items-center gap-2.5">
+    <div className="flex items-center justify-between p-3.5 rounded-xl bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 shadow-sm transition-colors">
+      <div className="flex items-center gap-3">
         <div
-          className={`p-1.5 rounded-lg transition-colors ${
+          className={`p-2 rounded-lg transition-colors ${
             strictMode
               ? "bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30"
               : "bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400"
@@ -61,16 +87,16 @@ export default function StrictToggle({
         </div>
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+            <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
               Strict Zero-Hallucination Mode
             </span>
             {strictMode && (
-              <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30">
+              <span className="text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30">
                 Guarded
               </span>
             )}
           </div>
-          <p className="text-[11px] text-zinc-500 dark:text-zinc-400">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
             {strictMode
               ? "Refuses speculation. Only answers from verified code chunks."
               : "Balanced mode: Conversational reasoning with grounded citations."}
