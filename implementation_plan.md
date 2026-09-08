@@ -123,19 +123,18 @@ repo-query-assistant/
 └── frontend/                      # Next.js Application (Phase 2)
     ├── src/
     │   ├── app/
-    │   │   ├── layout.tsx         # Global layout & dark-mode font wrapper
-    │   │   ├── globals.css        # Tailwind styling & sleek scrollbars
-    │   │   └── page.tsx           # Main Chat & Dashboard orchestration page
+    │   │   ├── layout.tsx         # Global layout & dark-mode font wrapper (Done!)
+    │   │   ├── globals.css        # Tailwind styling & sleek scrollbars (Done!)
+    │   │   └── page.tsx           # Main Chat & Dashboard orchestration page (Done!)
     │   ├── components/
-    │   │   ├── Navbar.tsx         # Branding & backend health indicator badge
-    │   │   ├── RepoInput.tsx      # GitHub URL input & index trigger button
-    │   │   ├── RepoSelector.tsx   # Dropdown to choose active indexed codebase
-    │   │   ├── StrictToggle.tsx   # Strict Zero-Hallucination mode switch
-    │   │   ├── ChatWindow.tsx     # Message feed & prompt submission input
-    │   │   ├── MessageBubble.tsx  # User & Assistant formatted message cards
-    │   │   └── CitationCard.tsx   # Expandable code snippets with line badges
+    │   │   ├── Navbar.tsx         # Branding & backend health indicator badge (Done!)
+    │   │   ├── RepoInput.tsx      # GitHub URL input & index trigger button (Done!)
+    │   │   ├── RepoSelector.tsx   # Dropdown to choose active indexed codebase (Done!)
+    │   │   ├── StrictToggle.tsx   # Strict Zero-Hallucination mode switch (Done!)
+    │   │   ├── ChatWindow.tsx     # Message feed & prompt submission input (Done!)
+    │   │   └── CitationCard.tsx   # Expandable code snippets with line badges (Done!)
     │   └── services/
-    │       └── api.ts             # Typed REST API Client for FastAPI backend
+    │       └── api.ts             # Typed REST API Client for FastAPI backend (Done!)
     ├── package.json
     └── tsconfig.json
 ```
@@ -156,21 +155,24 @@ repo-query-assistant/
 
 ### Phase 2: Next.js Modern Frontend
 - **Step 7: Next.js Scaffolding & Setup** — ✅ Completed
-- **Step 8: Typed API Client Layer (`services/api.ts`)** — ⏳ In Progress
-  - Define TypeScript data interfaces: `RepoMetadata`, `IndexStats`, `Citation`, `QueryResponse`.
-  - Implement `checkHealth()`, `getRepositories()`, `indexRepository()`, and `queryCodebase()`.
-- **Step 9: UI Components Construction** — ⏳ Next
-  - `Navbar.tsx`: Live backend connectivity badge.
-  - `RepoInput.tsx`: Clean GitHub repository cloner bar with loading animation.
-  - `RepoSelector.tsx`: Dropdown showing all indexed repos in SQLite.
+- **Step 8: Typed API Client Layer (`services/api.ts`)** — ✅ Completed
+- **Step 9: UI Components Construction** — ✅ Completed
+  - `Navbar.tsx`: Live backend connectivity badge (`GET /api/health`).
+  - `RepoInput.tsx`: Clean GitHub repository cloner bar with loading animation (`POST /api/index`).
+  - `RepoSelector.tsx`: Dropdown showing all indexed repos in SQLite (`GET /api/repos`).
   - `StrictToggle.tsx`: Pill toggle switch for Strict Zero-Hallucination Mode.
   - `CitationCard.tsx`: Collapsible drawer with file paths, line ranges, and formatted code snippets.
-  - `ChatWindow.tsx`: Real-time chat feed with Markdown rendering and user input.
-- **Step 10: Page Integration (`app/page.tsx`)** — ⏳ Next
-  - Wire state and component callbacks together in `page.tsx`.
+  - `ChatWindow.tsx`: Real-time chat feed with Markdown rendering and user input (`POST /api/query`).
+- **Step 10: Page Integration (`app/page.tsx`)** — ✅ Completed
+  - Wired state and component callbacks together in `page.tsx`.
 
 ---
 
-### Phase 3: Zero-Cost Deployment
-- **Step 11: Deploy Frontend to Vercel** (Free global edge CDN).
-- **Step 12: Deploy Backend to Render / Railway** (Free container hosting).
+### Phase 3: Verification & Zero-Cost Deployment
+- **Step 11: End-to-End Local Verification** — ⏳ Next Step
+  - Run `npm run dev` in `frontend/`.
+  - Open `http://localhost:3000` in browser.
+  - Verify live green health indicator (`FastAPI Online :8000`).
+  - Test asking questions on `psf_requests` and test indexing a new repo.
+- **Step 12: Deploy Frontend to Vercel** (Free global edge CDN).
+- **Step 13: Deploy Backend to Render / Railway** (Free container hosting).

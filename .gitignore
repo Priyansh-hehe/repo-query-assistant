@@ -1,24 +1,134 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-env/
-venv/
+# ===============================================================================
+# Comprehensive .gitignore for Codebase RAG (FastAPI + Next.js Stack)
+# ===============================================================================
 
-# Environment variables
+# -------------------------------------------------------------------------------
+# 1. AI Secrets, API Keys & Environment Files
+# -------------------------------------------------------------------------------
 .env
+.env.*
+*.env
+!.env.example
+backend/.env
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
 
-# Cloned GitHub Repositories (Stored locally for RAG)
+# -------------------------------------------------------------------------------
+# 2. AI Assistant, Agents & IDE Tooling Junk
+# -------------------------------------------------------------------------------
+.gemini/
+.agents/
+.cursor/
+.claude/
+.system_generated/
+scratch/
+
+# -------------------------------------------------------------------------------
+# 3. Local RAG Storage & Cloned Codebases (Heavy Data)
+# -------------------------------------------------------------------------------
+# Ignore all downloaded GitHub repositories (cloned for AST parsing)
 backend/data/repos/*
 !backend/data/repos/.gitkeep
 
-# Local Databases
-backend/data/chroma_db/
-backend/data/*.db
+# Ignore ChromaDB vector store binaries, parquet indexes & SQLite databases
+backend/data/chroma_db/*
+!backend/data/chroma_db/.gitkeep
 
-# Node.js
-node_modules/
-.next/
-dist/
+# Ignore SQLite relational database files
+backend/data/*.db
+backend/data/*.sqlite
+backend/data/*.sqlite3
+*.db-journal
+
+# -------------------------------------------------------------------------------
+# 4. Python Bytecode, Caches & Virtual Environments
+# -------------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Pytest & Linter caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# -------------------------------------------------------------------------------
+# 5. Frontend (Next.js / Node.js) Dependencies & Builds
+# -------------------------------------------------------------------------------
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+out/
+**/out/
+.turbo/
+**/.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# Package manager logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# -------------------------------------------------------------------------------
+# 6. Operating System & Code Editor Junk
+# -------------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+
+# Editors
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# Temporary & Swap Files
+*.tmp
+*.bak

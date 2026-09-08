@@ -1,67 +1,230 @@
-import Image from "next/image";
+/**
+ * ===============================================================================
+ * FILE: frontend/src/app/page.tsx
+ * COMPONENT: Main Application Dashboard & RAG Orchestrator
+ * 
+ * WHAT THIS FILE DOES:
+ * --------------------
+ * This is the central control center that orchestrates the entire user experience:
+ * 1. Manages global UI state:
+ *    - `isBackendOnline`: Live health pulse from FastAPI (`GET /api/health`).
+ *    - `repositories`: List of indexed repos loaded from SQLite (`GET /api/repos`).
+ *    - `selectedRepo`: The currently active repository targeted by the user.
+ *    - `strictMode`: Zero-Hallucination guardrail toggle.
+ *    - `messages`: Chronological conversation history with citations.
+ *    - `isQuerying`: Loading spinner status during Gemini Flash RAG synthesis.
+ * 2. Glues all modular UI components together:
+ *    - Navbar, RepoInput, RepoSelector, StrictToggle, and ChatWindow.
+ * 3. Handles optimistic UI updates and error alerts for a fluid developer workflow.
+ * ===============================================================================
+ */
+
+"use client";
+
+import React, { useState, useEffect, useCallback } from "react";
+import Navbar from "../components/Navbar";
+import RepoInput from "../components/RepoInput";
+import RepoSelector from "../components/RepoSelector";
+import StrictToggle from "../components/StrictToggle";
+import ChatWindow, { ChatMessage } from "../components/ChatWindow";
+import {
+  checkHealth,
+  getRepositories,
+  queryCodebase,
+  RepoMetadata,
+} from "../services/api";
 
 export default function Home() {
+  // Global State
+  const [isBackendOnline, setIsBackendOnline] = useState<boolean | null>(null);
+  const [repositories, setRepositories] = useState<RepoMetadata[]>([]);
+  const [selectedRepo, setSelectedRepo] = useState<string>("");
+  const [strictMode, setStrictMode] = useState<boolean>(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isQuerying, setIsQuerying] = useState<boolean>(false);
+  const [isLoadingRepos, setIsLoadingRepos] = useState<boolean>(true);
+
+  // 1. Check Backend Health on Mount & periodically
+  const verifyBackendHealth = useCallback(async () => {
+    try {
+      await checkHealth();
+      setIsBackendOnline(true);
+    } catch {
+      setIsBackendOnline(false);
+    }
+  }, []);
+
+  // 2. Fetch Indexed Repositories from SQLite
+  const loadRepositories = useCallback(async (autoSelectLatest?: string) => {
+    setIsLoadingRepos(true);
+    try {
+      const response = await getRepositories();
+      setRepositories(response.repositories);
+
+      if (autoSelectLatest) {
+        setSelectedRepo(autoSelectLatest);
+      } else if (response.repositories.length > 0 && !selectedRepo) {
+        // Default to the first indexed repo
+        setSelectedRepo(response.repositories[0].repo_name);
+      }
+    } catch (err) {
+      console.error("Failed to load repositories:", err);
+    } finally {
+      setIsLoadingRepos(false);
+    }
+  }, [selectedRepo]);
+
+  // Initial load
+  useEffect(() => {
+    verifyBackendHealth();
+    loadRepositories();
+
+    // Heartbeat check every 30 seconds
+    const interval = setInterval(verifyBackendHealth, 30000);
+    return () => clearInterval(interval);
+  }, [verifyBackendHealth, loadRepositories]);
+
+  // Callback when a new repo is indexed in RepoInput
+  const handleIndexComplete = (newRepoName: string) => {
+    loadRepositories(newRepoName);
+  };
+
+  // Callback when the user sends a question in ChatWindow
+  const handleSendMessage = async (question: string) => {
+    if (!selectedRepo) return;
+
+    const userMessageId = `user-${Date.now()}`;
+    const userTimestamp = new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const newUserMsg: ChatMessage = {
+      id: userMessageId,
+      sender: "user",
+      text: question,
+      timestamp: userTimestamp,
+    };
+
+    // Optimistic UI update: display user question immediately
+    setMessages((prev) => [...prev, newUserMsg]);
+    setIsQuerying(true);
+
+    try {
+      const result = await queryCodebase(selectedRepo, question, strictMode, 5);
+
+      const assistantMsg: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        sender: "assistant",
+        text: result.answer,
+        citations: result.citations,
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+
+      setMessages((prev) => [...prev, assistantMsg]);
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to generate answer.";
+      const errorMsg: ChatMessage = {
+        id: `error-${Date.now()}`,
+        sender: "assistant",
+        text: `⚠️ Error: ${errorMessage}`,
+        timestamp: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
+      setIsQuerying(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
+      {/* Top Navigation */}
+      <Navbar isBackendOnline={isBackendOnline} />
+
+      {/* Main Content Dashboard */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+        {/* Backend Warning Banner if Offline */}
+        {isBackendOnline === false && (
+          <div className="p-4 rounded-2xl bg-amber-950/40 border border-amber-800/80 text-amber-300 text-sm flex items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <p className="font-semibold">FastAPI Backend is not reachable</p>
+                <p className="text-xs text-amber-400/80 mt-0.5">
+                  Ensure the server is running by executing:{" "}
+                  <code className="px-2 py-0.5 rounded bg-zinc-900 font-mono text-zinc-200">
+                    python backend/main.py
+                  </code>
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={verifyBackendHealth}
+              className="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-medium border border-amber-500/30 transition-colors flex-shrink-0"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+              Retry Connection
+            </button>
+          </div>
+        )}
+
+        {/* Top Control Grid: Ingestion & Repo Switching */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Left Column: Repo Ingestion & Controls */}
+          <div className="lg:col-span-5 space-y-4">
+            <RepoInput onIndexComplete={handleIndexComplete} />
+
+            <div className="space-y-3">
+              <RepoSelector
+                repositories={repositories}
+                selectedRepo={selectedRepo}
+                onSelectRepo={setSelectedRepo}
+                isLoading={isLoadingRepos}
+              />
+
+              <StrictToggle
+                strictMode={strictMode}
+                onToggle={setStrictMode}
+                disabled={isQuerying}
+              />
+            </div>
+
+            {/* Architectural Highlights Card */}
+            <div className="p-4 rounded-xl bg-zinc-900/30 border border-zinc-800/60 text-xs text-zinc-400 space-y-2">
+              <div className="font-semibold text-zinc-300 flex items-center gap-1.5">
+                <span>💡</span>
+                <span>Zero-Cost Tech Stack</span>
+              </div>
+              <ul className="space-y-1 text-[11px] list-disc list-inside text-zinc-400">
+                <li>
+                  <strong className="text-zinc-300">Tree-sitter:</strong> AST-aware chunking preserving functions & line bounds.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">ChromaDB ONNX:</strong> Local embeddings in 5s with zero rate limits.
+                </li>
+                <li>
+                  <strong className="text-zinc-300">Gemini 3.6 Flash:</strong> Fast free-tier reasoning with 100% cited answers.
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Right Column: Chat Window Feed */}
+          <div className="lg:col-span-7">
+            <ChatWindow
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              isLoading={isQuerying}
+              selectedRepo={selectedRepo}
+              strictMode={strictMode}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </div>
         </div>
       </main>
     </div>
