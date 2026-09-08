@@ -59,14 +59,23 @@ export interface IndexResponse {
   stats: IndexStats;
 }
 
+export interface CitationDependencies {
+  calls?: string[];
+  imports?: string[];
+  called_by?: string[];
+  imported_by?: string[];
+}
+
 export interface Citation {
   file_path: string;
+  entity_type?: string;
   entity_name: string;
   start_line: number;
   end_line: number;
   snippet?: string;
   code?: string;
   github_url?: string;
+  dependencies?: CitationDependencies;
 }
 
 export interface QueryResponse {

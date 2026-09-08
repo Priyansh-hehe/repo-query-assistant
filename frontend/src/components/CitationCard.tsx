@@ -91,6 +91,53 @@ export default function CitationCard({ citation, index }: CitationCardProps) {
       {/* Collapsible Code Content */}
       {isOpen && (
         <div className="border-t border-zinc-200 dark:border-zinc-800/80 bg-zinc-50 dark:bg-zinc-950">
+          {/* AST Call Graph & Dependencies (GraphRAG) */}
+          {citation.dependencies && (
+            (citation.dependencies.calls?.length || 0) > 0 ||
+            (citation.dependencies.called_by?.length || 0) > 0 ||
+            (citation.dependencies.imports?.length || 0) > 0
+          ) && (
+            <div className="px-4 py-2.5 bg-zinc-100/60 dark:bg-zinc-900/40 border-b border-zinc-200 dark:border-zinc-800/60 space-y-1.5 text-xs font-mono">
+              <div className="text-[11px] uppercase tracking-wider font-semibold text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>
+                AST Dependency & Call Graph
+              </div>
+              {citation.dependencies.calls && citation.dependencies.calls.length > 0 && (
+                <div className="flex items-baseline flex-wrap gap-1.5">
+                  <span className="text-zinc-500 dark:text-zinc-400 text-[11px]">Calls:</span>
+                  {citation.dependencies.calls.slice(0, 6).map((c, i) => (
+                    <span key={i} className="px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-300 text-[11px] border border-cyan-500/20">
+                      {c}
+                    </span>
+                  ))}
+                  {citation.dependencies.calls.length > 6 && (
+                    <span className="text-zinc-400 text-[10px]">+{citation.dependencies.calls.length - 6} more</span>
+                  )}
+                </div>
+              )}
+              {citation.dependencies.called_by && citation.dependencies.called_by.length > 0 && (
+                <div className="flex items-baseline flex-wrap gap-1.5">
+                  <span className="text-zinc-500 dark:text-zinc-400 text-[11px]">Called by:</span>
+                  {citation.dependencies.called_by.slice(0, 4).map((c, i) => (
+                    <span key={i} className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 text-[11px] border border-emerald-500/20">
+                      {c}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {citation.dependencies.imports && citation.dependencies.imports.length > 0 && (
+                <div className="flex items-baseline flex-wrap gap-1.5">
+                  <span className="text-zinc-500 dark:text-zinc-400 text-[11px]">Imports:</span>
+                  {citation.dependencies.imports.slice(0, 4).map((m, i) => (
+                    <span key={i} className="px-1.5 py-0.5 rounded bg-violet-500/10 text-violet-600 dark:text-violet-300 text-[11px] border border-violet-500/20">
+                      {m}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="p-3.5 font-mono text-xs overflow-x-auto text-zinc-800 dark:text-zinc-300 max-h-64 leading-relaxed">
             <pre>
               <code>{citation.snippet || citation.code}</code>

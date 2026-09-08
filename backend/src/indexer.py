@@ -1,24 +1,26 @@
 """
 ===============================================================================
 FILE: backend/src/indexer.py
-MODULE: Local Vector Embedding Engine & ChromaDB Indexer (ONNX-Powered)
+MODULE: Local Vector Embedding Engine, ChromaDB Indexer & GraphRAG Pipeline
 
 WHAT THIS FILE DOES:
 --------------------
-This module provides high-speed, local-first vector storage and semantic search.
+This module provides high-speed, local-first vector storage, AST dependency
+extraction, and semantic search.
 Instead of sending code over the internet to a rate-limited cloud embedding API
 (which takes minutes and crashes when multiple users ingest code), this engine
-uses ChromaDB's built-in ONNX embedding model (`all-MiniLM-L6-v2`).
+uses ChromaDB's built-in ONNX embedding model (`all-MiniLM-L6-v2`) combined
+with SQLite-based topological call graph indexing (GraphRAG).
 
 WHY THIS ARCHITECTURE IS SUPERIOR:
 1. 100% Free & Unlimited: Zero API keys, zero rate limits (100 RPM ceiling gone).
-2. Blazing Fast: Embeds hundreds of AST code chunks in 5-10 seconds on local CPU.
+2. Blazing Fast: Embeds hundreds of AST code chunks in 3-6 seconds on local CPU.
 3. Multi-User Safe: Two users can index repositories simultaneously without
    colliding on a shared cloud API quota.
-4. Fully Deployable: Runs smoothly inside Docker containers, Render, or Railway
+4. Hybrid GraphRAG: Couples dense vector representations with explicit AST
+   call graphs (calls, callers, module imports) stored in SQLite.
+5. Fully Deployable: Runs smoothly inside Docker containers, Render, or Railway
    free tiers without external network dependencies.
-5. Search & Retrieval: Converts queries into vectors and executes sub-millisecond
-   cosine similarity queries in ChromaDB.
 ===============================================================================
 """
 
@@ -36,8 +38,14 @@ from src.config import (
     REPOS_DIR
 )
 from src.ingestion import clone_repository, discover_code_files, parse_repo_name_from_url
-from src.parser import chunk_file
-from src.db import init_db, register_or_update_repo, clear_repo_cache
+from src.parser import parse_file_ast, chunk_file
+from src.db import (
+    init_db,
+    register_or_update_repo,
+    clear_repo_cache,
+    record_dependencies,
+    clear_repo_dependencies
+)
 
 
 def get_chroma_client() -> chromadb.PersistentClient:
@@ -103,13 +111,15 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
     if not code_files:
         raise ValueError("No valid source code files found in this repository.")
 
-    # Step 3: AST Parsing
+    # Step 3: AST Parsing & Topological Dependency Extraction (GraphRAG)
     if progress_callback:
-        progress_callback(f"Parsing AST chunks across {len(code_files)} files...")
+        progress_callback(f"Parsing AST chunks & call graph across {len(code_files)} files...")
     all_chunks = []
+    all_dependencies = []
     for file_info in code_files:
-        file_chunks = chunk_file(file_info["absolute_path"], str(repo_path))
+        file_chunks, file_deps = parse_file_ast(file_info["absolute_path"], str(repo_path))
         all_chunks.extend(file_chunks)
+        all_dependencies.extend(file_deps)
 
     if not all_chunks:
         raise ValueError("Failed to extract any code chunks from the files.")
@@ -153,13 +163,15 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
         if progress_callback:
             progress_callback(f"Progress: {processed_count}/{total_chunks} chunks indexed...")
 
-    # Step 6: Save repo record in SQLite & invalidate stale query cache
+    # Step 6: Save repo record & AST dependencies in SQLite & invalidate stale query cache
     register_or_update_repo(
         repo_name=repo_name,
         repo_url=repo_url,
         local_path=str(repo_path),
         total_chunks=total_chunks
     )
+    clear_repo_dependencies(repo_name)
+    record_dependencies(repo_name, all_dependencies)
     clear_repo_cache(repo_name)
 
     duration_seconds = round(time.time() - start_time, 2)
@@ -169,6 +181,7 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
         "repo_path": str(repo_path),
         "total_files": len(code_files),
         "total_chunks": total_chunks,
+        "total_dependencies": len(all_dependencies),
         "duration_seconds": duration_seconds
     }
 
@@ -193,8 +206,15 @@ def query_similar_chunks(repo_name: str, query: str, top_k: int = 5) -> List[Dic
         distances = results["distances"][0] if "distances" in results and results["distances"] else [0.0] * len(documents)
 
         for doc, meta, dist in zip(documents, metadatas, distances):
+            # Strip the synthetic "File: ...\nEntity: ...\n\n" prefix from code if present
+            code_body = doc
+            if doc.startswith("File:"):
+                parts = doc.split("\n\n", 1)
+                if len(parts) > 1:
+                    code_body = parts[1]
+
             matched_chunks.append({
-                "code": doc,
+                "code": code_body,
                 "file_path": meta["file_path"],
                 "entity_type": meta["entity_type"],
                 "entity_name": meta["entity_name"],

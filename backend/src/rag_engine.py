@@ -1,27 +1,32 @@
 """
 ===============================================================================
 FILE: backend/src/rag_engine.py
-MODULE: Grounded RAG Generation Engine & Prompt Orchestrator
+MODULE: Grounded RAG Generation Engine, GraphRAG Orchestrator & Citation Filter
 
 WHAT THIS FILE DOES:
 --------------------
 This is the core RAG intelligence layer where Retrieval meets Generative AI.
 It takes a user's question, performs intent routing, fetches the most relevant
-code chunks from ChromaDB, assembles them into an augmented open-book prompt,
-enforces strict citation and anti-hallucination rules, and calls Google Gemini Flash
-to synthesize an accurate, cited explanation.
+code chunks from ChromaDB, enriches each chunk with 1-hop AST call graph
+dependencies from SQLite (GraphRAG), assembles them into an augmented open-book
+prompt, enforces strict citation and anti-hallucination rules, and calls Google
+Gemini Flash to synthesize an accurate, cited explanation.
 
 KEY RESPONSIBILITIES & IMPLEMENTATIONS:
 1. Conversational Intent Routing (`is_conversational_query`):
    - Prevents "phantom citations" / retrieval over-triggering by detecting
      pure greetings and vague remarks (e.g. "hi", "what?", "thanks", "who are you").
    - Bypasses ChromaDB vector search for conversational chat and returns 0 citations.
-2. Prompt Construction (`build_rag_prompt`):
+2. Topological GraphRAG Enrichment:
+   - Queries SQLite `code_dependencies` to retrieve what functions each chunk
+     calls, which files call it, and what modules were imported.
+   - Embeds this structured graph directly above the code in the LLM prompt.
+3. Prompt Construction (`build_rag_prompt`):
    - Formats retrieved chunks with their exact file path, entity type, name,
-     and 1-indexed line ranges.
+     line ranges, and AST call graph.
    - Enforces strict citation rules: the model MUST cite files and lines when using code.
    - Enforces anti-hallucination: if code is missing, it must say "not found".
-3. Strict Citation Attribution Filtering:
+4. Strict Citation Attribution Filtering:
    - Evaluates whether the generated response actually utilized the retrieved
      chunks by verifying explicit file/entity mentions in the synthesized text.
    - Completely eliminates phantom citations: if a file is not mentioned in the
@@ -35,7 +40,7 @@ from typing import List, Dict, Any
 from google import genai
 from src.config import GOOGLE_API_KEY, GENERATION_MODEL
 from src.indexer import query_similar_chunks
-from src.db import get_repo, get_cached_query, set_cached_query
+from src.db import get_repo, get_cached_query, set_cached_query, get_entity_dependencies
 
 
 def is_conversational_query(query: str) -> bool:
@@ -67,14 +72,35 @@ def is_conversational_query(query: str) -> bool:
 
 
 def build_rag_prompt(question: str, chunks: List[Dict[str, Any]], strict_mode: bool = False) -> str:
-    """Formats the retrieved code chunks into an open-book exam prompt."""
+    """Formats the retrieved code chunks and AST call graphs into an open-book exam prompt."""
     context_sections = []
     
     for i, chunk in enumerate(chunks, 1):
+        deps = chunk.get("dependencies") or {}
+        calls = deps.get("calls", [])
+        called_by = deps.get("called_by", [])
+        imported_by = deps.get("imported_by", [])
+        imports = deps.get("imports", [])
+
+        dep_lines = []
+        if calls:
+            dep_lines.append(f"  - Calls: {', '.join(calls[:8])}")
+        if called_by:
+            dep_lines.append(f"  - Called by: {', '.join(called_by[:5])}")
+        if imported_by:
+            dep_lines.append(f"  - Imported by: {', '.join(imported_by[:5])}")
+        if imports:
+            dep_lines.append(f"  - File Imports: {', '.join(imports[:8])}")
+
+        dep_header = ""
+        if dep_lines:
+            dep_header = "Call Graph & Dependencies (AST):\n" + "\n".join(dep_lines) + "\n"
+
         context_sections.append(
             f"--- SOURCE CHUNK #{i} ---\n"
             f"File: {chunk['file_path']} (Lines {chunk['start_line']} - {chunk['end_line']})\n"
             f"Entity: {chunk['entity_type']} {chunk['entity_name']}\n"
+            f"{dep_header}"
             f"Code:\n{chunk['code']}\n"
         )
     
@@ -82,11 +108,12 @@ def build_rag_prompt(question: str, chunks: List[Dict[str, Any]], strict_mode: b
 
     if strict_mode:
         instructions = """STRICT ZERO-HALLUCINATION MODE IS ACTIVE:
-1. EXCLUSIVE GROUNDING: Answer using ONLY the exact facts and logic visible in the code snippets below. You are strictly forbidden from using outside knowledge, extrapolating, or guessing.
+1. EXCLUSIVE GROUNDING: Answer using ONLY the exact facts, logic, and AST call graph relations visible in the code snippets below. You are strictly forbidden from using outside knowledge, extrapolating, or guessing.
 2. MANDATORY CITATIONS: Every factual statement or explanation MUST cite the exact file path and line numbers (e.g. `requests/sessions.py`, lines 40-75).
-3. STRICT REFUSAL: If the question cannot be answered completely from the provided snippets, state ONLY:
+3. CALL GRAPH TRACING: Use the attached Call Graph & Dependencies metadata to explain function calls, callers, and module imports accurately.
+4. STRICT REFUSAL: If the question cannot be answered completely from the provided snippets, state ONLY:
    "Strict Mode: This information is not found in the indexed codebase context."
-4. NO CHITCHAT: Disregard greetings or conversational remarks. Focus exclusively on verified code evidence."""
+5. NO CHITCHAT: Disregard greetings or conversational remarks. Focus exclusively on verified code evidence."""
     else:
         instructions = """BALANCED CONVERSATIONAL MODE:
 1. GENERAL QUESTIONS & CHAT:
@@ -94,13 +121,14 @@ def build_rag_prompt(question: str, chunks: List[Dict[str, Any]], strict_mode: b
 2. REPOSITORY & CODEBASE QUESTIONS:
    - When the user asks about THIS specific codebase (how something is implemented, architecture, where functions live, or requests citations), ground your answer in the provided code snippets below.
    - For every claim about this repository's code, cite the relevant file path and line numbers (e.g. `requests/sessions.py`, lines 40-75).
+   - Use the Call Graph & Dependencies metadata to explain callers, callees, and imported packages.
    - If a specific feature is not visible in the snippets, explain what you found or clarify that it wasn't in the retrieved snippets, while still being helpful."""
 
     return f"""You are an expert software engineering assistant with access to an indexed code repository.
 
 {instructions}
 
-RETRIEVED CODE CONTEXT:
+RETRIEVED CODE CONTEXT & CALL GRAPH:
 {context_text}
 
 USER QUESTION:
@@ -112,13 +140,14 @@ RESPONSE:
 
 def answer_question(repo_name: str, question: str, top_k: int = 5, strict_mode: bool = False) -> Dict[str, Any]:
     """
-    Orchestrates the entire RAG pipeline with Intent Routing and Citation Attribution:
+    Orchestrates the entire RAG pipeline with Intent Routing, GraphRAG, and Citation Attribution:
     1. Validates repo in SQLite
     2. Routes conversational queries without polluting vector citations
     3. Retrieves top-K chunks from ChromaDB
-    4. Assembles prompt (Balanced vs Strict mode)
-    5. Calls Gemini Flash
-    6. Filters citations to only those actually attributed/used in the answer
+    4. Enriches chunks with 1-hop AST call graph dependencies from SQLite
+    5. Assembles prompt (Balanced vs Strict mode)
+    6. Calls Gemini Flash
+    7. Filters citations to only those actually attributed/used in the answer
     """
     # 1. Verify repo exists in SQLite
     repo = get_repo(repo_name)
@@ -158,10 +187,18 @@ def answer_question(repo_name: str, question: str, top_k: int = 5, strict_mode: 
             "citations": []
         }
 
-    # 5. Assemble prompt with strict citation constraints
+    # 5. Enrich chunks with 1-hop AST call graph & dependencies from SQLite (GraphRAG)
+    for chunk in chunks:
+        chunk["dependencies"] = get_entity_dependencies(
+            repo_name=repo_name,
+            entity_name=chunk["entity_name"],
+            file_path=chunk["file_path"]
+        )
+
+    # 6. Assemble prompt with strict citation & call graph constraints
     prompt = build_rag_prompt(question, chunks, strict_mode=strict_mode)
 
-    # 6. Call Gemini Flash via official Google GenAI SDK
+    # 7. Call Gemini Flash via official Google GenAI SDK
     response = client.models.generate_content(
         model=GENERATION_MODEL,
         contents=prompt
@@ -169,7 +206,7 @@ def answer_question(repo_name: str, question: str, top_k: int = 5, strict_mode: 
 
     answer_text = response.text or ""
 
-    # 7. Strict Citation Attribution Filtering:
+    # 8. Strict Citation Attribution Filtering:
     # Only return citations if the answer actually used/referenced them!
     if strict_mode:
         # In strict mode, if the model refused, return 0 citations
@@ -199,12 +236,13 @@ def answer_question(repo_name: str, question: str, top_k: int = 5, strict_mode: 
             "start_line": c["start_line"],
             "end_line": c["end_line"],
             "code": c["code"],
-            "distance": c["distance"]
+            "distance": c["distance"],
+            "dependencies": c.get("dependencies", {})
         }
         for c in used_chunks
     ]
 
-    # 8. Save result into persistent SQLite cache for future users & refreshes!
+    # 9. Save result into persistent SQLite cache for future users & refreshes!
     set_cached_query(repo_name, question, strict_mode, answer_text, citations)
 
     return {

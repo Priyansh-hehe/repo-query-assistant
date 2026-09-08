@@ -83,23 +83,39 @@ export default function TechStackModal({ isOpen, onClose }: TechStackModalProps)
 
         {/* Modal Body: Tech Specs Grid */}
         <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
-          {/* Card 1: Tree-sitter */}
+          {/* Card 1: Tree-sitter AST & Call Graph */}
           <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center justify-between mb-1.5">
               <span className="font-semibold text-base text-zinc-900 dark:text-zinc-200">
-                Tree-sitter AST Parsing
+                Tree-sitter AST & Call Graph Extraction
               </span>
               <span className="text-xs px-2.5 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400 font-mono font-medium">
-                Parsing Layer
+                Parsing & Graph Layer
               </span>
             </div>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
               Extracts complete functions, methods, and classes along with exact 1-indexed line ranges.
-              Avoids cutting logic in half like naive line chunking.
+              Recursively traces AST call expressions (<code className="font-mono text-zinc-800 dark:text-zinc-300">CALLS</code>) and module imports (<code className="font-mono text-zinc-800 dark:text-zinc-300">IMPORTS</code>) across files.
             </p>
           </div>
 
-          {/* Card 2: Local ONNX ChromaDB */}
+          {/* Card 2: GraphRAG & SQLite */}
+          <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-semibold text-base text-zinc-900 dark:text-zinc-200">
+                Hybrid GraphRAG & SQLite Metadata
+              </span>
+              <span className="text-xs px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-medium">
+                Topological Graph & Cache
+              </span>
+            </div>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
+              Stores 1-hop topological call graphs in indexed SQLite tables.
+              Enriches retrieved vector chunks with exact caller-callee chains so Gemini knows which files invoke or import each function without guessing.
+            </p>
+          </div>
+
+          {/* Card 3: Local ONNX ChromaDB */}
           <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center justify-between mb-1.5">
               <span className="font-semibold text-base text-zinc-900 dark:text-zinc-200">
@@ -111,31 +127,15 @@ export default function TechStackModal({ isOpen, onClose }: TechStackModalProps)
             </div>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
               Uses the <code className="font-mono text-zinc-800 dark:text-zinc-300">all-MiniLM-L6-v2</code> ONNX
-              model running locally on CPU. Embeds 800+ chunks in ~5 seconds with zero API costs, zero cloud rate limits, and multi-user concurrency.
+              model running locally on CPU. Embeds 800+ chunks in ~3-5 seconds with zero API costs, zero cloud rate limits, and multi-user concurrency.
             </p>
           </div>
 
-          {/* Card 3: SQLite Cache & Registry */}
+          {/* Card 4: Gemini Flash-Lite */}
           <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
             <div className="flex items-center justify-between mb-1.5">
               <span className="font-semibold text-base text-zinc-900 dark:text-zinc-200">
-                SQLite Metadata & Query Cache
-              </span>
-              <span className="text-xs px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-medium">
-                Multi-User Cache
-              </span>
-            </div>
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
-              Maintains indexed repository catalog and persists precomputed question responses on disk.
-              Identical queries respond in &lt;1ms across all users, page refreshes, and server restarts.
-            </p>
-          </div>
-
-          {/* Card 4: Gemini Flash */}
-          <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-950/60 border border-zinc-200 dark:border-zinc-800">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="font-semibold text-base text-zinc-900 dark:text-zinc-200">
-                Google Gemini 3.6 Flash
+                Google Gemini Flash + Guardrails
               </span>
               <span className="text-xs px-2.5 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 font-mono font-medium">
                 Generative AI
@@ -143,7 +143,7 @@ export default function TechStackModal({ isOpen, onClose }: TechStackModalProps)
             </div>
             <p className="text-sm text-zinc-600 dark:text-zinc-400 leading-relaxed">
               Official native Google GenAI SDK integration with dual-mode prompt guardrails:
-              Balanced Conversational Mode & Strict Zero-Hallucination Mode with verified line citations and GitHub permalinks.
+              Balanced Conversational Mode & Strict Zero-Hallucination Mode with verified line citations, AST call graphs, and direct GitHub permalinks.
             </p>
           </div>
         </div>
