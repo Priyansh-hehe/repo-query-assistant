@@ -98,7 +98,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="Paste public GitHub repository link (e.g. https://github.com/psf/requests)..."
               disabled={isLoading}
-              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder:text-black dark:placeholder:text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50 font-medium"
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 font-normal"
             />
           </div>
 

@@ -44,15 +44,15 @@ export default function StrictToggle({
             ? "Strict Zero-Hallucination Mode: Active (Refuses speculation, strictly grounded)"
             : "Balanced Mode: Conversational reasoning with grounded citations"
         }
-        className={`px-3.5 py-1.5 rounded-full text-sm font-semibold border flex items-center gap-2 transition-all ${
+        className={`px-3.5 py-1.5 rounded-full text-sm font-medium border flex items-center gap-2 transition-all ${
           strictMode
             ? "bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-400 shadow-sm"
-            : "bg-zinc-100 dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-black dark:text-white hover:border-cyan-500"
+            : "bg-zinc-100 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-zinc-300"
         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <span
           className={`h-2.5 w-2.5 rounded-full transition-colors ${
-            strictMode ? "bg-amber-500 animate-pulse" : "bg-black dark:bg-white"
+            strictMode ? "bg-amber-500 animate-pulse" : "bg-zinc-400 dark:bg-zinc-500"
           }`}
         />
         <span>Strict Mode</span>

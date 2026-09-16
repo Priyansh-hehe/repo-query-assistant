@@ -80,7 +80,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={onOpenTechStack}
-            className="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white transition-colors flex items-center gap-1.5 shadow-sm"
+            className="px-3.5 py-1.5 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white transition-colors flex items-center gap-1.5 shadow-xs"
           >
             <svg
               className="w-4 h-4 text-cyan-600 dark:text-cyan-400"

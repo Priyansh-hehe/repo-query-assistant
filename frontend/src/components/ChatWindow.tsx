@@ -107,27 +107,27 @@ export default function ChatWindow({
               </svg>
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-black dark:text-white">
+              <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-white">
                 Ready to explore{" "}
                 <span className="text-cyan-600 dark:text-cyan-400 font-mono">
                   {selectedRepo || "codebase"}
                 </span>
               </h3>
-              <p className="text-xs sm:text-sm text-black dark:text-white max-w-md mt-1 font-medium">
+              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-md mt-1 font-normal">
                 Ask architectural questions, trace function executions, or audit
                 logic with grounded line citations.
               </p>
             </div>
 
             {/* Quick Starter Suggestions */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full max-w-lg pt-1">
               {STARTER_PROMPTS.map((prompt, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => onSendMessage(prompt)}
                   disabled={isLoading}
-                  className="text-left text-xs sm:text-sm p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-black dark:text-white font-semibold hover:border-cyan-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 shadow-sm transition-colors cursor-pointer"
+                  className="text-left text-xs sm:text-sm p-3 rounded-xl bg-white dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:border-cyan-500/40 hover:bg-zinc-50 dark:hover:bg-zinc-800/60 transition-colors font-normal shadow-xs cursor-pointer"
                 >
                   &ldquo;{prompt}&rdquo;
                 </button>
@@ -246,7 +246,7 @@ export default function ChatWindow({
               : "Please select or index a repository first..."
           }
           disabled={isLoading}
-          className="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder:text-black dark:placeholder:text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none font-medium"
+          className="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-500 dark:placeholder-zinc-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none font-normal"
         />
 
         <button
