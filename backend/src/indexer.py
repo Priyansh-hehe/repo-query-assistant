@@ -124,6 +124,12 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
     if not all_chunks:
         raise ValueError("Failed to extract any code chunks from the files.")
 
+    # Cap massive repositories to 300 key chunks to prevent memory exhaustion on cloud tiers
+    MAX_CHUNKS_PER_REPO = 300
+    if len(all_chunks) > MAX_CHUNKS_PER_REPO:
+        print(f"[Indexer] Capping {len(all_chunks)} chunks to top {MAX_CHUNKS_PER_REPO} for high-speed indexing.")
+        all_chunks = all_chunks[:MAX_CHUNKS_PER_REPO]
+
     # Step 4 & 5: Local ONNX Embedding & ChromaDB Storage
     # Reset collection so re-indexing is completely fresh without stale or orphan chunks
     try:

@@ -56,5 +56,5 @@ EMBEDDING_MODEL = "all-MiniLM-L6-v2 (Local ONNX)"
 # Chat reasoning model uses Google Gemini 3.5 Flash Lite (0.9s sub-second responses)
 GENERATION_MODEL = "gemini-3.5-flash-lite"
 
-# Local ONNX batch size (can process large batches locally with zero network latency)
-EMBEDDING_BATCH_SIZE = 100
+# Local ONNX batch size (32 keeps memory footprint under 200MB, preventing OOM crashes)
+EMBEDDING_BATCH_SIZE = 32

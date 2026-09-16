@@ -55,15 +55,46 @@ IGNORED_DIRECTORIES = {
     "__tests__",
     "spec",
     "specs",
+    "e2e",
+    "cypress",
+    "docs",
+    "doc",
+    "documentation",
+    "examples",
+    "example",
+    "samples",
+    "fixtures",
+    "mocks",
+    "mock",
+    "__mocks__",
+    "public",
+    "assets",
+    "static",
+    "locales",
+    "i18n",
+    "translations",
+    ".github",
+    ".storybook",
 }
 
-# File extensions we recognize as code or text worth reading
+# Source code extensions that contain actual programming logic
 SUPPORTED_EXTENSIONS = {
     ".py", ".js", ".jsx", ".ts", ".tsx",
     ".go", ".java", ".rs", ".c", ".cpp",
     ".h", ".hpp", ".cs", ".rb", ".php",
-    ".html", ".css", ".sql", ".sh",
-    ".json", ".yaml", ".yml", ".md", ".txt"
+    ".sql", ".sh", ".html", ".css"
+}
+
+# Critical configuration or documentation files allowed specifically by exact name
+ALLOWED_SPECIAL_FILES = {
+    "package.json",
+    "tsconfig.json",
+    "pyproject.toml",
+    "dockerfile",
+    "docker-compose.yml",
+    "readme.md",
+    "readme",
+    "makefile"
 }
 
 # Known text files that often don't have extensions
@@ -72,7 +103,6 @@ SUPPORTED_NAMES_WITHOUT_EXT = {
 }
 
 # Dependency lockfiles and build noise to always exclude from indexing
-# (Lockfiles contain 10,000+ lines of package hashes that drastically slow down indexing)
 IGNORED_FILE_NAMES = {
     "package-lock.json",
     "yarn.lock",
@@ -89,10 +119,17 @@ IGNORED_SUFFIXES = (
     ".min.css",
     ".map",
     ".lock",
+    ".svg",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".ico",
+    ".csv",
+    ".tsv",
 )
 
-# Skip any individual file larger than 1MB (avoids minified bundles, big datasets)
-MAX_FILE_SIZE_BYTES = 1024 * 1024  # 1 MB
+# Skip any individual file larger than 150KB (source code rarely exceeds this; prevents data bloat)
+MAX_FILE_SIZE_BYTES = 150 * 1024  # 150 KB
 
 
 def parse_repo_name_from_url(repo_url: str) -> str:
@@ -167,9 +204,9 @@ def discover_code_files(repo_path: Path) -> List[Dict[str, Any]]:
             file_path = Path(root) / file_name
             ext = file_path.suffix.lower()
 
-            # Only accept supported code extensions or known extensionless files
+            # Only accept supported code extensions or allowed critical files
             is_valid_ext = ext in SUPPORTED_EXTENSIONS
-            is_valid_name = lower_name in SUPPORTED_NAMES_WITHOUT_EXT
+            is_valid_name = lower_name in SUPPORTED_NAMES_WITHOUT_EXT or lower_name in ALLOWED_SPECIAL_FILES
             if not (is_valid_ext or is_valid_name):
                 continue
 
