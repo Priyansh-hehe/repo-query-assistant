@@ -23,8 +23,12 @@
  */
 
 // Central backend URL: defaults to localhost:8000 for local development,
-// or reads from environment variable when deployed to production.
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const rawUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE_URL = rawUrl.trim().replace(/\/+$/, "");
+
+if (typeof window !== "undefined") {
+  console.log("[Code Query AI] Backend Target URL:", API_BASE_URL);
+}
 
 // =============================================================================
 // TypeScript Interfaces (Data Contracts mirroring FastAPI Pydantic Models)
