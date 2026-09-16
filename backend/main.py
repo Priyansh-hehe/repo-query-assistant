@@ -42,11 +42,20 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from src.db import list_repos, get_repo, init_db
-from src.indexer import index_repository
+from src.indexer import index_repository, get_local_embedding_function
 from src.rag_engine import answer_question
 
 # Initialize SQLite tables on startup
 init_db()
+
+# Warmup embedding model on server boot so user indexing requests never hang or timeout
+try:
+    print("[Startup] Initializing and warming up local ONNX embedding engine...")
+    _warmup_fn = get_local_embedding_function()
+    _warmup_fn(["warmup"])
+    print("[Startup] Local ONNX embedding engine is warm and ready!")
+except Exception as _e:
+    print(f"[Startup] Embedding warmup notice: {_e}")
 
 # Create FastAPI application
 app = FastAPI(

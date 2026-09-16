@@ -26,6 +26,7 @@ WHY THIS ARCHITECTURE IS SUPERIOR:
 
 import re
 import time
+import gc
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 
@@ -168,6 +169,9 @@ def index_repository(repo_url: str, progress_callback=None) -> Dict[str, Any]:
         processed_count = min(i + EMBEDDING_BATCH_SIZE, total_chunks)
         if progress_callback:
             progress_callback(f"Progress: {processed_count}/{total_chunks} chunks indexed...")
+
+    # Immediately release unused memory back to OS
+    gc.collect()
 
     # Step 6: Save repo record & AST dependencies in SQLite & invalidate stale query cache
     register_or_update_repo(
