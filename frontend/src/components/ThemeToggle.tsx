@@ -43,11 +43,22 @@ export default function ThemeToggle() {
     setTheme(nextTheme);
     localStorage.setItem("theme", nextTheme);
 
+    // Temporarily disable all transitions for 100% instant snap
+    document.documentElement.classList.add("no-transitions");
+
     if (nextTheme === "dark") {
       document.documentElement.classList.add("dark");
     } else {
       document.documentElement.classList.remove("dark");
     }
+
+    // Force synchronous browser layout reflow without transitions
+    void document.documentElement.offsetHeight;
+
+    // Restore transitions for interactive clicks on next frame
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove("no-transitions");
+    });
   };
 
   if (!mounted) {

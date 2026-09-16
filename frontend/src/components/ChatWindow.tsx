@@ -83,7 +83,7 @@ export default function ChatWindow({
 
   return (
     <div
-      className={`flex flex-col bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm transition-all duration-500 ease-in-out ${
+      className={`flex flex-col bg-white dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm dark:shadow-xl overflow-hidden backdrop-blur-sm transition-[height] duration-500 ease-in-out ${
         messages.length === 0 ? "h-[370px]" : "h-[650px]"
       }`}
     >
@@ -107,13 +107,13 @@ export default function ChatWindow({
               </svg>
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-zinc-900 dark:text-zinc-100">
+              <h3 className="text-base sm:text-lg font-bold text-black dark:text-white">
                 Ready to explore{" "}
                 <span className="text-cyan-600 dark:text-cyan-400 font-mono">
                   {selectedRepo || "codebase"}
                 </span>
               </h3>
-              <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 max-w-md mt-1">
+              <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 max-w-md mt-1 font-normal">
                 Ask architectural questions, trace function executions, or audit
                 logic with grounded line citations.
               </p>
@@ -127,7 +127,7 @@ export default function ChatWindow({
                   type="button"
                   onClick={() => onSendMessage(prompt)}
                   disabled={isLoading || !selectedRepo}
-                  className="text-left text-xs sm:text-sm p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:border-cyan-500/50 hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-all disabled:opacity-40"
+                  className="text-left text-xs sm:text-sm p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white font-medium hover:border-cyan-500/50 hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-all disabled:opacity-40"
                 >
                   &ldquo;{prompt}&rdquo;
                 </button>
@@ -162,7 +162,7 @@ export default function ChatWindow({
                 className={`max-w-[90%] sm:max-w-[85%] rounded-2xl p-4 sm:p-5 text-sm sm:text-base leading-relaxed ${
                   msg.sender === "user"
                     ? "bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md shadow-cyan-600/10"
-                    : "bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/90 text-zinc-900 dark:text-zinc-200 shadow-sm"
+                    : "bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800/90 text-black dark:text-white shadow-sm"
                 }`}
               >
                 <div className="whitespace-pre-wrap font-sans text-sm sm:text-base leading-relaxed">
@@ -208,7 +208,7 @@ export default function ChatWindow({
         {/* Loading Shimmer while reasoning */}
         {isLoading && (
           <div className="flex flex-col items-start space-y-2">
-            <div className="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+            <div className="flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400 font-mono">
               <span className="font-semibold">Code Query AI</span>
               <span>&bull;</span>
               <span className="text-cyan-600 dark:text-cyan-400 animate-pulse">
@@ -217,12 +217,12 @@ export default function ChatWindow({
                   : "Searching ChromaDB & synthesizing..."}
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-sm flex items-center gap-3">
+            <div className="p-4 rounded-2xl bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white text-sm flex items-center gap-3">
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-500 dark:bg-cyan-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-cyan-600 dark:bg-cyan-500"></span>
               </span>
-              <span>Gemini 3.6 Flash is analyzing retrieved code chunks...</span>
+              <span>Analyzing retrieved code chunks with Gemini Flash-Lite...</span>
             </div>
           </div>
         )}
@@ -246,7 +246,7 @@ export default function ChatWindow({
               : "Please select or index a repository first..."
           }
           disabled={isLoading || !selectedRepo}
-          className="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none transition-all disabled:opacity-50"
+          className="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none transition-all disabled:opacity-50"
         />
 
         <button

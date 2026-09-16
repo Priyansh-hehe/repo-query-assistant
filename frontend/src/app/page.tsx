@@ -158,7 +158,7 @@ export default function Home() {
   const activeRepoMeta = repositories.find((r) => r.repo_name === selectedRepo);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200 transition-colors">
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* Top Navigation */}
       <Navbar
         isBackendOnline={isBackendOnline}
@@ -219,10 +219,10 @@ export default function Home() {
         {/* 2. Active Repository Status Strip */}
         <section className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 rounded-xl bg-white dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 shadow-sm text-sm">
           <div className="flex items-center gap-2.5 min-w-0">
-            <span className="text-zinc-500 dark:text-zinc-400 font-medium">Target Codebase:</span>
+            <span className="text-black dark:text-zinc-300 font-semibold">Target Codebase:</span>
             {selectedRepo ? (
               <div className="flex items-center gap-2.5 truncate">
-                <span className="font-semibold text-zinc-900 dark:text-zinc-100 truncate font-mono text-sm sm:text-base">
+                <span className="font-bold text-black dark:text-white truncate font-mono text-sm sm:text-base">
                   {selectedRepo}
                 </span>
                 {activeRepoMeta && (
@@ -232,7 +232,7 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <span className="text-zinc-400 italic">None selected</span>
+              <span className="text-zinc-600 dark:text-zinc-400 italic font-medium">None selected</span>
             )}
           </div>
 

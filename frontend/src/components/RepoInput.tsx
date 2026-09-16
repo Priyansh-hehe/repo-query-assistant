@@ -71,7 +71,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
   };
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-xl backdrop-blur-sm transition-colors">
+    <div className="w-full bg-white dark:bg-zinc-900/70 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-4 sm:p-6 shadow-sm dark:shadow-xl backdrop-blur-sm">
       <form onSubmit={handleIndexSubmit} className="space-y-3">
         {/* Prominent Wide Input Bar */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch">
@@ -98,7 +98,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="Paste public GitHub repository link (e.g. https://github.com/psf/requests)..."
               disabled={isLoading}
-              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 dark:placeholder-zinc-500 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50 font-normal"
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50 font-medium"
             />
           </div>
 

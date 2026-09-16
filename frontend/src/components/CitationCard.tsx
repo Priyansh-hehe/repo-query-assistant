@@ -44,11 +44,11 @@ export default function CitationCard({ citation, index }: CitationCardProps) {
           <span className="flex-shrink-0 px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 font-mono text-xs font-semibold border border-cyan-500/20">
             Citation #{index + 1}
           </span>
-          <span className="font-mono text-zinc-800 dark:text-zinc-200 truncate font-medium text-xs sm:text-sm">
+          <span className="font-mono text-black dark:text-white truncate font-semibold text-xs sm:text-sm">
             {citation.file_path}
           </span>
           {citation.entity_name && (
-            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 font-mono text-xs hidden sm:inline">
+            <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800 text-black dark:text-white font-mono text-xs font-medium hidden sm:inline">
               {citation.entity_name}
             </span>
           )}
@@ -62,12 +62,12 @@ export default function CitationCard({ citation, index }: CitationCardProps) {
               rel="noreferrer"
               onClick={(e) => e.stopPropagation()}
               title="Jump to code on GitHub"
-              className="px-2.5 py-0.5 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 hover:text-cyan-600 dark:text-zinc-300 dark:hover:text-cyan-400 font-mono text-xs flex items-center gap-1 transition-colors border border-zinc-200 dark:border-zinc-700"
+              className="px-2.5 py-0.5 rounded bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-black dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 font-mono text-xs flex items-center gap-1 transition-colors border border-zinc-200 dark:border-zinc-700 font-medium"
             >
               <span>GitHub ↗</span>
             </a>
           )}
-          <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 text-zinc-600 dark:text-zinc-400 font-mono text-xs">
+          <span className="px-2 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800/80 text-black dark:text-white font-mono text-xs font-semibold">
             L{citation.start_line} - L{citation.end_line}
           </span>
           <svg

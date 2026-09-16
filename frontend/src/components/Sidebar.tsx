@@ -78,10 +78,10 @@ export default function Sidebar({
               </svg>
             </div>
             <div>
-              <h2 className="font-bold text-base text-zinc-900 dark:text-white">
+              <h2 className="font-bold text-base text-black dark:text-white">
                 Indexed Codebases
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-xs text-zinc-700 dark:text-zinc-300 font-medium">
                 {repositories.length} {repositories.length === 1 ? "repository" : "repositories"} available
               </p>
             </div>
@@ -91,7 +91,7 @@ export default function Sidebar({
             type="button"
             onClick={onClose}
             aria-label="Close sidebar"
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+            className="p-1.5 rounded-lg text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
           >
             <svg
               className="w-5 h-5"
@@ -112,13 +112,13 @@ export default function Sidebar({
         {/* Repositories List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
           {isLoading ? (
-            <div className="p-6 text-center text-sm text-zinc-400 animate-pulse">
+            <div className="p-6 text-center text-sm text-zinc-600 dark:text-zinc-300 animate-pulse">
               Loading repositories...
             </div>
           ) : repositories.length === 0 ? (
-            <div className="p-6 text-center space-y-2 text-zinc-400">
-              <p className="text-sm font-medium">No repositories indexed yet.</p>
-              <p className="text-xs text-zinc-500">
+            <div className="p-6 text-center space-y-2 text-zinc-600 dark:text-zinc-300">
+              <p className="text-sm font-semibold text-black dark:text-white">No repositories indexed yet.</p>
+              <p className="text-xs text-zinc-600 dark:text-zinc-400">
                 Paste a GitHub URL in the center bar to index your first codebase!
               </p>
             </div>
@@ -136,7 +136,7 @@ export default function Sidebar({
                   className={`w-full text-left p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 ${
                     isSelected
                       ? "bg-cyan-500/10 border-cyan-500/40 text-cyan-900 dark:text-cyan-200 shadow-sm"
-                      : "bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/80 text-zinc-700 dark:text-zinc-300 hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-900/80"
+                      : "bg-zinc-50 dark:bg-zinc-900/40 border-zinc-200 dark:border-zinc-800/80 text-black dark:text-white hover:border-zinc-300 dark:hover:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-900/80"
                   }`}
                 >
                   <div className="flex-1 min-w-0">
@@ -148,16 +148,16 @@ export default function Sidebar({
                         <span className="flex-shrink-0 h-2 w-2 rounded-full bg-cyan-500" />
                       )}
                     </div>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400 truncate mt-1 font-mono">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400 truncate mt-1 font-mono">
                       {repo.repo_url}
                     </p>
                   </div>
 
                   <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
-                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium">
+                    <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-black dark:text-white font-medium">
                       {repo.total_chunks} chunks
                     </span>
-                    <span className="text-[11px] text-zinc-400">
+                    <span className="text-[11px] text-zinc-600 dark:text-zinc-400 font-medium">
                       {repo.indexed_at ? repo.indexed_at.split(" ")[0] : ""}
                     </span>
                   </div>

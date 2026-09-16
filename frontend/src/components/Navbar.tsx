@@ -40,7 +40,7 @@ export default function Navbar({
   isQuerying = false,
 }: NavbarProps) {
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md transition-colors">
+    <header className="sticky top-0 z-40 w-full border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left Section: 3-Bar Hamburger + Brand */}
         <div className="flex items-center gap-3">
@@ -49,7 +49,7 @@ export default function Navbar({
             type="button"
             onClick={onToggleSidebar}
             aria-label="Open repository menu"
-            className="p-2 rounded-xl text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
+            className="p-2 rounded-xl text-black dark:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all focus:outline-none focus:ring-2 focus:ring-cyan-500/40"
           >
             <svg
               className="w-5 h-5"
@@ -68,7 +68,7 @@ export default function Navbar({
 
           {/* Brand Name */}
           <div>
-            <h1 className="font-bold text-lg sm:text-xl text-zinc-900 dark:text-white tracking-tight leading-normal">
+            <h1 className="font-bold text-lg sm:text-xl text-black dark:text-white tracking-tight leading-normal">
               Intelligent Code Query Engine
             </h1>
           </div>
@@ -80,7 +80,7 @@ export default function Navbar({
           <button
             type="button"
             onClick={onOpenTechStack}
-            className="px-3.5 py-1.5 rounded-full text-sm font-medium bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 transition-colors flex items-center gap-1.5 shadow-sm"
+            className="px-3.5 py-1.5 rounded-full text-sm font-semibold bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white transition-colors flex items-center gap-1.5 shadow-sm"
           >
             <svg
               className="w-4 h-4 text-cyan-600 dark:text-cyan-400"
