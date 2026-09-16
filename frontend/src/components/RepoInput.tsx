@@ -76,7 +76,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
         {/* Prominent Wide Input Bar */}
         <div className="flex flex-col sm:flex-row gap-3 items-stretch">
           <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-zinc-400 dark:text-zinc-500">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-black dark:text-white">
               {/* GitHub Link Icon */}
               <svg
                 className="w-5 h-5"
@@ -98,7 +98,7 @@ export default function RepoInput({ onIndexComplete }: RepoInputProps) {
               onChange={(e) => setRepoUrl(e.target.value)}
               placeholder="Paste public GitHub repository link (e.g. https://github.com/psf/requests)..."
               disabled={isLoading}
-              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50 font-medium"
+              className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder:text-black dark:placeholder:text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50 font-medium"
             />
           </div>
 

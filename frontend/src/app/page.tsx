@@ -232,14 +232,14 @@ export default function Home() {
                 )}
               </div>
             ) : (
-              <span className="text-zinc-600 dark:text-zinc-400 italic font-medium">None selected</span>
+              <span className="text-black dark:text-white italic font-bold">None selected</span>
             )}
           </div>
 
           <button
             type="button"
             onClick={() => setIsSidebarOpen(true)}
-            className="text-sm text-cyan-600 dark:text-cyan-400 hover:underline flex items-center gap-1.5 font-medium flex-shrink-0"
+            className="text-sm text-black dark:text-white hover:text-cyan-600 dark:hover:text-cyan-400 flex items-center gap-1.5 font-bold flex-shrink-0"
           >
             <span>Browse Repos ({repositories.length})</span>
             <svg

@@ -113,7 +113,7 @@ export default function ChatWindow({
                   {selectedRepo || "codebase"}
                 </span>
               </h3>
-              <p className="text-xs sm:text-sm text-zinc-700 dark:text-zinc-300 max-w-md mt-1 font-normal">
+              <p className="text-xs sm:text-sm text-black dark:text-white max-w-md mt-1 font-medium">
                 Ask architectural questions, trace function executions, or audit
                 logic with grounded line citations.
               </p>
@@ -126,8 +126,8 @@ export default function ChatWindow({
                   key={idx}
                   type="button"
                   onClick={() => onSendMessage(prompt)}
-                  disabled={isLoading || !selectedRepo}
-                  className="text-left text-xs sm:text-sm p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 text-black dark:text-white font-medium hover:border-cyan-500/50 hover:bg-zinc-100 dark:hover:bg-zinc-900/80 transition-all disabled:opacity-40"
+                  disabled={isLoading}
+                  className="text-left text-xs sm:text-sm p-2.5 rounded-xl bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 text-black dark:text-white font-semibold hover:border-cyan-500 hover:bg-zinc-100 dark:hover:bg-zinc-900 shadow-sm transition-colors cursor-pointer"
                 >
                   &ldquo;{prompt}&rdquo;
                 </button>
@@ -245,8 +245,8 @@ export default function ChatWindow({
               ? `Ask anything about ${selectedRepo}... (Enter to send)`
               : "Please select or index a repository first..."
           }
-          disabled={isLoading || !selectedRepo}
-          className="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder-zinc-500 dark:placeholder-zinc-400 text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none transition-all disabled:opacity-50"
+          disabled={isLoading}
+          className="flex-1 px-4 py-3 rounded-xl bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-black dark:text-white placeholder:text-black dark:placeholder:text-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 resize-none font-medium"
         />
 
         <button
