@@ -25,6 +25,7 @@ frontend/.env.production.local
 .claude/
 .system_generated/
 scratch/
+PROJECT_KNOWLEDGE_HANDOFF.md
 
 # -------------------------------------------------------------------------------
 # 3. Local RAG Storage & Cloned Codebases (Heavy Data)
