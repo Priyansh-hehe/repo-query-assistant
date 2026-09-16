@@ -87,7 +87,7 @@ This section defines **every single touchpoint** where the Next.js React fronten
 
 ---
 
-## 3. Interview Cheat Sheet & Core Architectural Distinctions
+## 3. Core Architectural Concepts
 
 Use this quick-reference guide during technical interviews or project presentations:
 
